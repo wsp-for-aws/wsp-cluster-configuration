@@ -3,9 +3,6 @@ kind: Role
 metadata:
   name: wsp-cd
 rules:
-  - apiGroups:
-      - '*'
-    resources:
-      - '*'
-    verbs:
-      - '*'
+  - apiGroups: [ '*' ]
+    resources: [ '*' ]
+    verbs: [ '*' ]
