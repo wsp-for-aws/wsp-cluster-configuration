@@ -7,11 +7,11 @@ resources:
   - ../../default/
 
 patches:
-  - path: rolebinding.yaml
-    target:
+  - target:
       kind: RoleBinding
       name: wsp-cd
-  - path: role.yaml
-    target:
+    path: rolebinding.yaml
+  - target:
       kind: Role
       name: wsp-cd
+    path: role.yaml

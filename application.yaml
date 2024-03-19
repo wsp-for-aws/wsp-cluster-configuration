@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: sync-all-clusters
+  name: app-to-sync-all-appsets
   namespace: argocd
 spec:
   project: default
