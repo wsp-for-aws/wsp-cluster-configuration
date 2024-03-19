@@ -4,6 +4,8 @@ metadata:
   name: sync-clusters-infra
   namespace: argocd
 spec:
+  goTemplate: true
+  goTemplateOptions: [ "missingkey=error" ]
   generators:
     - git:
         repoURL: https://git.plesk.tech/scm/wsp/wsp-clusters-infra.git
@@ -12,15 +14,19 @@ spec:
           - path: clusters/*
   template:
     metadata:
-      name: 'sync-{{path.basename}}-cluster'
+      name: 'sync-{{.path.basename}}-cluster'
     spec:
       project: default
       source:
         repoURL: https://git.plesk.tech/scm/wsp/wsp-clusters-infra.git
         targetRevision: kustomize
-        path: '{{path}}'
+        path: '{{.path.path}}'
       destination:
-        server: https://kubernetes.default.svc
+        # TODO: We need to use a correct target cluster by the name
+        #  name: 'wsp-{{index .path.segments 1}}-cluster'
+        #  OR
+        #  server: https://kubernetes.default.svc
+        name: 'wsp-{{.path.basename}}-cluster'
         namespace: argocd
       syncPolicy:
         automated:

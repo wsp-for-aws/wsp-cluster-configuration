@@ -1,0 +1,13 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: '__NEED_TO_SPECIFY_A_TARGET_NAMESPACE__'
+
+resources:
+  - ../../default/
+
+#patches:
+#  - target:
+#      kind: Role
+#      name: wsp-cd
+#    path: role.yaml
