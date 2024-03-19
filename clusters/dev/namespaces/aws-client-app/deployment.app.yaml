@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: app
+spec:
+  selector:
+    matchLabels:
+      app: app
+  template:
+    metadata:
+      labels:
+        app: app
+      annotations:
+        iam.amazonaws.com/role: arn:aws:iam::000000000000:role/Role_A
+        #iam.amazonaws.com/role: arn:aws:iam::000000000000:role/Role_B # not allowed
+    spec:
+      containers:
+        - name: app
+          image: nginx:1.7.9
+          ports:
+            - containerPort: 80
+              name: http
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 200m
+              memory: 256Mi

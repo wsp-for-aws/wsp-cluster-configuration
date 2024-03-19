@@ -1,0 +1,44 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: wsp-sync-${CLUSTER_NAME}-cluster-infra
+  namespace: argocd
+spec:
+  syncPolicy:
+    preserveResourcesOnDeletion: true # ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/
+  goTemplate: true
+  goTemplateOptions: [ "missingkey=error" ] # ref: https://pkg.go.dev/text/template#Template.Option
+  generators:
+    - git:
+        # repoURL: https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git
+        repoURL: https://github.com/wsp-for-aws/wsp-cluster-configuration.git
+        revision: master
+        directories:
+          - path: clusters/${CLUSTER_NAME}/namespaces/*
+          - path: clusters/${CLUSTER_NAME}/cluster-wide
+  template:
+    metadata:
+      name: 'cluster-{{index .path.segments 1}}-ns-{{.path.basename}}'
+      labels:
+        wsp.io/application-name: '{{.path.basename}}'
+        wsp.io/environment: '{{index .path.segments 1}}'
+    spec:
+      project: default
+      source:
+        # repoURL: https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git
+        repoURL: https://github.com/wsp-for-aws/wsp-cluster-configuration.git
+        targetRevision: master
+        path: '{{.path.path}}'
+      destination:
+        # TODO: We need to use a correct target cluster by the name
+        #  name: 'wsp-{{index .path.segments 1}}-cluster'
+        #  OR
+        #  server: https://kubernetes.default.svc
+        name: 'wsp-{{index .path.segments 1}}-cluster'
+        namespace: ''
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true

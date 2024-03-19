@@ -1,0 +1,17 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Values
+policies:
+  - name: restrict-kube2iam-annotations
+    rules:
+      - name: block-kube2iam-annotation
+        values:
+          # the var can override in variables on value or configMap only (cannot jmesPath)
+          mapAllowedAssumeRole.data.allowFor: |
+            'test-namespace': ['arn:aws:iam::000000000000:role/expected-role']
+            'star-namespace': ['*']
+      - name: block-kube2iam-annotation-apps
+        values:
+          # the var can override in variables on value or configMap only (cannot jmesPath)
+          mapAllowedAssumeRole.data.allowFor: |
+            'test-namespace': ['arn:aws:iam::000000000000:role/expected-role']
+            'star-namespace': ['*']

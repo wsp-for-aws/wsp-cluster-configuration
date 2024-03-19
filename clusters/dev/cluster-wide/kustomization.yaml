@@ -1,0 +1,21 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+commonLabels:
+  wsp.io/part-of: wsp-cluster-configuration
+  wsp.io/cluster-name: dev
+
+resources:
+  ## Source of the policies: https://kyverno.io/policies/
+  - kyverno-policies/add-default-requests.yaml
+  - kyverno-policies/no-loadbalancer-service.yaml
+#  - kyverno-policies/restrict-ingress-wildcard.yaml
+  - kyverno-policies/restrict-kube2iam-annotations.yaml
+#  - kyverno-policies/unique-external-dns.yaml
+#  - kyverno-policies/unique-ingress-host.yaml
+#  - kyverno-policies/validate-probes.yaml
+  - ccnp.core-dns-ingress.yaml
+  - ccnp.core-dns-egress.yaml
+  - cr.wsp-admin.yaml
+  - cr.wsp-cd-default.yaml
+  - cr.wsp-viewer.yaml

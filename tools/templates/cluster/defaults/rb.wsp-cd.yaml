@@ -4,9 +4,9 @@ metadata:
   name: wsp-cd
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: Role
-  name: wsp-cd
+  kind: ClusterRole
+  name: wsp-cd-default
 subjects:
   - kind: ServiceAccount
-    name: wsp-ci-cd
-    namespace: kube-system
+    name: wsp-cd
+    namespace: wsp-ns
