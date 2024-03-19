@@ -1,0 +1,16 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: app-in-one
+resources:
+  - ../../default/
+  - ../../cluster-wide/
+
+patches:
+  - path: rolebinding.yaml
+    target:
+      kind: RoleBinding
+      name: wsp-cd
+  - path: role.yaml
+    target:
+      kind: Role
+      name: wsp-cd
