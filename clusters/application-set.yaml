@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: sync-clusters-infra
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://git.plesk.tech/scm/wsp/wsp-clusters-infra.git
+        revision: kustomize
+        directories:
+          - path: clusters/*
+  template:
+    metadata:
+      name: 'sync-{{path.basename}}-cluster'
+    spec:
+      project: default
+      source:
+        repoURL: https://git.plesk.tech/scm/wsp/wsp-clusters-infra.git
+        targetRevision: kustomize
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: argocd
+      syncPolicy:
+        automated:
+          prune: false
+          selfHeal: true
