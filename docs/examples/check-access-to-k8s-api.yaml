@@ -1,0 +1,59 @@
+apiVersion: "batch/v1"
+kind: "Job"
+metadata:
+  name: "test-api-access"
+  annotations:
+    argocd.argoproj.io/hook: PostSync
+spec:
+  template:
+    spec:
+      containers:
+        - name: "test-api-access"
+          image: "bitnami/kubectl:1.29.4"
+          command:
+            - "sh"
+            - "-c"
+          args:
+            - |
+              echo HELLO KUBERNETES!
+              
+              # Point to the internal API server hostname
+              APISERVER=https://kubernetes.default.svc
+              echo "APISERVER: $APISERVER"
+
+              # Path to ServiceAccount token
+              SERVICEACCOUNT=/var/run/secrets/kubernetes.io/serviceaccount
+              echo "SERVICEACCOUNT: $SERVICEACCOUNT"
+
+              # Read this Pod's namespace
+              NAMESPACE=$(cat ${SERVICEACCOUNT}/namespace)
+              echo "NAMESPACE: $NAMESPACE"
+
+              # Read the ServiceAccount bearer token
+              TOKEN=$(cat ${SERVICEACCOUNT}/token)
+              echo "TOKEN: $TOKEN"
+
+              # Reference the internal certificate authority (CA)
+              CACERT=${SERVICEACCOUNT}/ca.crt
+              echo "CACERT: $CACERT"
+
+              echo '---'
+              echo "Using the calculated values to access the cluster"
+              kubectl get po --server=$APISERVER --token=$TOKEN --certificate-authority=$CACERT --namespace=$NAMESPACE
+              
+              echo '---'
+              echo "Using the default environment variables to access the cluster"
+              kubectl get po
+              
+              echo '---'
+              echo "Try to get access to the secrets"
+              kubectl get secrets || echo "Success! Access to the secrets is denied."
+
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "100Mi"
+            requests:
+              cpu: "100m"
+              memory: "100Mi"
+      restartPolicy: "Never"

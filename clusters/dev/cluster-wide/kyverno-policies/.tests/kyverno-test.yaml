@@ -1,0 +1,35 @@
+apiVersion: cli.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: disallow_kube2iam_role
+policies:
+  - ../restrict-kube2iam-annotations.yaml
+resources:
+  - resource.yaml
+variables: values.yaml
+results:
+  - policy: restrict-kube2iam-annotations
+    rule: block-kube2iam-annotation
+    resource: set-expected-role-pod
+    kind: Pod
+    result: pass
+  - policy: restrict-kube2iam-annotations
+    rule: block-kube2iam-annotation
+    resource: set-unexpected-role-pod
+    kind: Pod
+    result: fail
+  - policy: restrict-kube2iam-annotations
+    rule: block-kube2iam-annotation
+    resource: no-annotation-pod
+    kind: Pod
+    result: skip
+  - policy: restrict-kube2iam-annotations
+    rule: block-kube2iam-annotation
+    resource: any-role-pod
+    kind: Pod
+    result: pass
+  - policy: restrict-kube2iam-annotations
+    rule: block-kube2iam-annotation-apps
+    resource: app
+    kind: Deployment
+    result: pass
