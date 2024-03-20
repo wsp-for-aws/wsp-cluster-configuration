@@ -8,7 +8,8 @@ spec:
   goTemplateOptions: [ "missingkey=error" ] # ref: https://pkg.go.dev/text/template#Template.Option
   generators:
     - git:
-        repoURL: https://git.plesk.tech/scm/wsp/wsp-clusters-infra.git
+#        repoURL: https://git.plesk.tech/scm/wsp/wsp-clusters-infra.git
+        repoURL: https://github.com/wsp-for-aws/wsp-cluster-infra.git
         revision: kustomize
         directories:
           - path: clusters/*/namespaces/*
@@ -22,7 +23,8 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://git.plesk.tech/scm/wsp/wsp-clusters-infra.git
+#        repoURL: https://git.plesk.tech/scm/wsp/wsp-clusters-infra.git
+        repoURL: https://github.com/wsp-for-aws/wsp-cluster-infra.git
         targetRevision: kustomize
         path: '{{.path.path}}'
       destination:

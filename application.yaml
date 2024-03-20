@@ -6,7 +6,8 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://git.plesk.tech/scm/wsp/wsp-clusters-infra.git
+#    repoURL: https://git.plesk.tech/scm/wsp/wsp-clusters-infra.git
+    repoURL: https://github.com/wsp-for-aws/wsp-cluster-infra.git
     targetRevision: kustomize
     path: 'clusters/'
   destination:
