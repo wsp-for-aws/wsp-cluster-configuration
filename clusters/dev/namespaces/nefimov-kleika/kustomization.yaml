@@ -5,3 +5,26 @@ namespace: nefimov-kleika
 
 resources:
   - ../../default/
+
+replacements:
+  - source:
+      kind: Namespace
+    targets:
+      - select:
+          kind: CiliumNetworkPolicy
+          name: allow-traffic-within-namespace
+        fieldPaths:
+          - spec.0.egress.0.toEndpoints.0.matchLabels.[k8s:io.kubernetes.pod.namespace]
+          - spec.0.ingress.0.fromEndpoints.0.matchLabels.[k8s:io.kubernetes.pod.namespace]
+
+#
+#replacements:
+#  - source:
+#      kind: Namespace
+#    targets:
+#      - select:
+#          kind: CiliumNetworkPolicy
+#          name: allow-traffic-within-namespace
+#        fieldPaths:
+#          - spec.0.egress.0.toEndpoints.0.matchLabels.[k8s:io.kubernetes.pod.namespace]
+#          - spec.0.ingress.0.fromEndpoints.0.matchLabels.[k8s:io.kubernetes.pod.namespace]

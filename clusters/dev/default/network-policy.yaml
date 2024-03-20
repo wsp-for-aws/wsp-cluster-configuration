@@ -1,16 +1,15 @@
-# CiliumNetworkPolicy allow all traffic in the namespace only
 apiVersion: cilium.io/v2
 kind: CiliumNetworkPolicy
 metadata:
-  name: wsp-cd
+  name: allow-traffic-within-namespace
 spec:
   - endpointSelector:
       matchLabels: { }
     egress:
       - toEndpoints:
           - matchLabels:
-              "k8s:io.kubernetes.pod.namespace": current-namespace
+              "k8s:io.kubernetes.pod.namespace": __namespace__
     ingress:
       - fromEndpoints:
           - matchLabels:
-              "k8s:io.kubernetes.pod.namespace": current-namespace
+              "k8s:io.kubernetes.pod.namespace": __namespace__
