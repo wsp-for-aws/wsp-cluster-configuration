@@ -29,8 +29,13 @@ kubectl -n argocd port-forward deployments/argocd-server 8080:8080
 ```
 
 Login via CLI argocd
-```
+```bash
 argocd login localhost:8080 --username admin --password admin --insecure
 ```
 
-Open ArgoCD UI http://localhost:8080
+Add minikube cluster to argocd
+```bash
+argocd cluster add minikube --name wsp-dev-cluster --insecure
+```
+
+Open ArgoCD UI: http://localhost:8080
