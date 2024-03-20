@@ -4,6 +4,9 @@ metadata:
   name: wsp-sync-infra-per-ns
   namespace: argocd
 spec:
+  syncPolicy:
+    applicationSync: create-update # create-only, create-delete sync
+    preserveResourcesOnDeletion: true
   goTemplate: true
   goTemplateOptions: [ "missingkey=error" ] # ref: https://pkg.go.dev/text/template#Template.Option
   generators:
