@@ -3,13 +3,10 @@ kind: CiliumNetworkPolicy
 metadata:
   name: allow-traffic-within-namespace
 spec:
-  - endpointSelector:
-      matchLabels: { }
-    egress:
-      - toEndpoints:
-          - matchLabels:
-              "k8s:io.kubernetes.pod.namespace": __namespace__
-    ingress:
-      - fromEndpoints:
-          - matchLabels:
-              "k8s:io.kubernetes.pod.namespace": __namespace__
+  endpointSelector: { }
+  egress:
+    - toEndpoints:
+        - { }
+  ingress:
+    - fromEndpoints:
+        - { }

@@ -6,7 +6,7 @@ metadata:
 spec:
   syncPolicy:
     applicationSync: create-update # create-only, create-delete sync
-    preserveResourcesOnDeletion: true
+    preserveResourcesOnDeletion: true # ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/
   goTemplate: true
   goTemplateOptions: [ "missingkey=error" ] # ref: https://pkg.go.dev/text/template#Template.Option
   generators:
