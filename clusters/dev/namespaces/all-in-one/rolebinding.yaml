@@ -4,7 +4,7 @@ metadata:
   name: wsp-cd
 roleRef:
   apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
+  kind: Role
   name: wsp-cd
 subjects:
   - kind: ServiceAccount
