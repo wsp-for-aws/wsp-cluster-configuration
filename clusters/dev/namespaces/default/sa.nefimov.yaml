@@ -3,3 +3,12 @@ kind: ServiceAccount
 metadata:
   name: user-nefimov
   namespace: default
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: token-for-user-nefimov
+  namespace: default
+  annotations:
+    kubernetes.io/service-account.name: user-nefimov
+type: kubernetes.io/service-account-token

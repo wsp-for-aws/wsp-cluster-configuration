@@ -1,7 +1,9 @@
 #!/bin/bash
 set -e
 
+###
 # This script generates a kubeconfig file for a service account, which can be used to authenticate to a Kubernetes cluster.
+###
 
 USERNAME=$1
 NAMESPACE=$2
