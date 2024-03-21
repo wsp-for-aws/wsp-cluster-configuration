@@ -10,3 +10,6 @@ subjects:
   - kind: ServiceAccount
     name: wsp-ci-cd
     namespace: kube-system
+  - kind: ServiceAccount
+    name: user-nefimov
+    namespace: default
