@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: wsp-sync-infra-per-ns
+  name: wsp-sync-dev-cluster-infra
   namespace: argocd
 spec:
   syncPolicy:
@@ -14,8 +14,8 @@ spec:
         repoURL: https://github.com/wsp-for-aws/wsp-cluster-infra.git
         revision: kustomize
         directories:
-          - path: clusters/*/namespaces/*
-          - path: clusters/*/cluster-wide
+          - path: clusters/dev/namespaces/*
+          - path: clusters/dev/cluster-wide
   template:
     metadata:
       name: 'cluster-{{index .path.segments 1}}-ns-{{.path.basename}}'

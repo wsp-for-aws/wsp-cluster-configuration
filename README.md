@@ -5,6 +5,29 @@ This repository contains the infrastructure code and resources for the WSP appli
 
 All stored resources will be delivered to the WSP clusters automatically.
 
+## Structure
+
+The repository is structured as follows:
+
+```bash
+/clusters          # The root directory for all the clusters
+  /{cluster-name}  # dev, staging, prod, etc.
+
+    /cluster-wide           # Resources that are cluster-wide
+      /{resource-name}.yaml # ClusterRole, ClusterRoleBinding, CiliumClusterwideNetworkPolicy, etc.   
+      /kustomization.yaml   # The kustomization file for the cluster-wide resources
+
+    /default                # Default resources that are namespace-wide
+      /{resource-name}.yaml # Namespace, ResourceQuote, CiliumNetworkPolicy, Role, RoleBinding, etc.
+      /kustomization.yaml   # The kustomization file for the default resources
+
+    /namespaces               # The directory for the cluster namespaces resources
+      /{namespace-name}       # wsp-app-ns, default, monitoring, etc.
+        /{resource-name}.yaml # Override the default resources or add new resources
+        /kustomization.yaml   # The kustomization file for the namespace resources with rules to override the default resources
+```
+
+
 ## Add a new application namespace.
 
 ```bash

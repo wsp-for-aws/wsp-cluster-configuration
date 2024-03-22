@@ -9,7 +9,7 @@ spec:
 #    repoURL: https://git.plesk.tech/scm/wsp/wsp-clusters-infra.git
     repoURL: https://github.com/wsp-for-aws/wsp-cluster-infra.git
     targetRevision: kustomize
-    path: 'clusters/'
+    path: 'argocd/'
   destination:
     server: https://kubernetes.default.svc
     namespace: argocd
