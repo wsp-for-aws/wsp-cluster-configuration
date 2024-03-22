@@ -8,9 +8,13 @@ resources:
 
 patches:
   - target:
+      kind: ResourceQuota
+      name: wsp
+    path: resource-quota.yaml
+  - target:
       kind: RoleBinding
       name: wsp-cd
-    path: rolebinding.yaml
+    path: role-binding.yaml
   - target:
       kind: Role
       name: wsp-cd

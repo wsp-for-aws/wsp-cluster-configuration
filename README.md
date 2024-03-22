@@ -33,19 +33,20 @@ If you want to add a custom resource to the application namespace you need to mo
 
 ## How we can customize this application namespace?
 
-### Overriding the wsp-cd role.
+### Overriding the wsp resource limits.
 
 ```bash
 cat <<EOF > role.yaml
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
+kind: ResourceQuota
 metadata:
-  name: wsp-cd
+  name: wsp
   namespace: app
-rules:
-- apiGroups: ["*"]
-  resources: ["*"]
-  verbs: ["*"]
+spec:
+  hard:
+    requests.cpu: "2"  # we change the default value from 1 to 2
+    limits.cpu: "4"    # from 2 to 4
+    limits.memory: 6Gi # from 4Gi to 6Gi
 EOF
 ```
 
@@ -60,9 +61,9 @@ namespace: app
 
 patches:
   - target:
-      kind: Role
-      name: wsp-cd
-    path: role.yaml
+      kind: ResourceQuota
+      name: wsp
+    path: resource-quota.yaml
 ```
 
 ### Add additional cilium network policies.
