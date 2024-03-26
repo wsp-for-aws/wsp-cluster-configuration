@@ -23,12 +23,16 @@ minikube addons enable ingress
 Install ArgoCD
 ```bash
 kubectl create namespace argocd
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/master/manifests/install.yaml
-```
 
-Setup admin password to 'admin'
-```bash
-kubectl -n argocd patch secret argocd-secret   -p '{"stringData": {
+# use kustomize to deploy ArgoCD
+kubectl apply -n argocd -k deploy
+
+# OR
+
+# use the manifest file to deploy ArgoCD
+kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/master/manifests/install.yaml
+# Setup admin password to 'admin'
+kubectl -n argocd patch secret argocd-secret -p '{"stringData": {
     "admin.password": "$2a$10$48U85bahwi7Vb4TQeFnvuOBLqhuDuHGvX22IRQYBwOZeCBoUhLV2K",
     "admin.passwordMtime": "'$(date +%FT%T%Z)'"
   }}'

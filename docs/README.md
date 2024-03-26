@@ -1,7 +1,7 @@
 Documentation
 =
 
-- [Install ArgoCD](install-argocd.md)
+- [Install ArgoCD](../deploy/install-argocd.md)
 
 
 ### How to deploy the ArgoCD application to the WSP ArgoCD server

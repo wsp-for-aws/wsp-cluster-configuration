@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+namespace: argocd
+resources:
+  - https://raw.githubusercontent.com/argoproj/argo-cd/master/manifests/install.yaml
+patches:
+  # Specify the admin password for the ArgoCD UI (admin)
+  - target:
+      version: v1
+      kind: Secret
+      name: argocd-secret
+    patch: |-
+      - op: add
+        path: "/stringData"
+        value: |-
+          "admin.password": "$2a$10$48U85bahwi7Vb4TQeFnvuOBLqhuDuHGvX22IRQYBwOZeCBoUhLV2K"
+          "admin.passwordMtime": "2021-09-01T00:00:00Z"

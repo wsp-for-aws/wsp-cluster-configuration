@@ -7,7 +7,7 @@ set -e
 
 USERNAME=$1
 NAMESPACE=$2
-SA_NAMESPACE=${3:-default}
+SA_NAMESPACE=${SA_NAMESPACE:-default}
 
 #create a temporary directory to store the kubeconfig file
 mkdir -p /tmp/kubeconfig
