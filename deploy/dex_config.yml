@@ -1,0 +1,54 @@
+issuer: https://192-168-49-1.nip.io:5556
+storage:
+  type: sqlite3
+web:
+  http: 0.0.0.0:5556
+oauth2:
+  skipApprovalScreen: false
+
+connectors:
+  - type: mockCallback
+    id: mock
+    name: Example
+
+staticClients:
+  - id: kubelogin
+    redirectURIs:
+      - 'http://localhost:8000'
+      - 'http://localhost:18000' # (used if the port 8000 is already in use)
+    name: kubelogin
+    public: true
+  - id: dex-k8s-authenticator
+    redirectURIs:
+      # These redirect URIs point to the `--redirect-url` for OAuth2 proxy.
+      - 'http://login.local.host/oauth2/callback'
+      - 'https://login.local.host/oauth2/callback'
+      - 'http://oauth2-proxy.local.host/oauth2/callback' # For nginx and traefik example.
+    name: 'OAuth2 Proxy'
+    secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+  - id: oauth2-proxy
+    redirectURIs:
+      # These redirect URIs point to the `--redirect-url` for OAuth2 proxy.
+      - 'http://oauth2-proxy.local.host/oauth2/callback' # For nginx and traefik example.
+    name: 'OAuth2 Proxy'
+    secret: ZXhhbXBsZS1hcHAtc2VjcmV0
+
+enablePasswordDB: true
+staticPasswords:
+  - email: "admin@example.com"
+    # bcrypt hash of the string "password": $(echo password | htpasswd -BinC 10 admin | cut -d: -f2)
+    hash: "$2y$10$y6NxF7kB4Bl27WToSR.3WO1RrA6I5z4RCFlK83alHXNo4uA4wpDl2"
+    username: "admin"
+    userID: "08a8684b-db88-4b73-90a9-3cd1661f5466"
+  - email: "user-a@x.x"
+    hash: "$2y$10$y6NxF7kB4Bl27WToSR.3WO1RrA6I5z4RCFlK83alHXNo4uA4wpDl2"
+    username: "user-a"
+    userID: "08a8684b-db88-4b73-90a9-3cd1661f5460"
+  - email: "user-b@x.x"
+    hash: "$2y$10$y6NxF7kB4Bl27WToSR.3WO1RrA6I5z4RCFlK83alHXNo4uA4wpDl2"
+    username: "user-b"
+    userID: "08a8684b-db88-4b73-90a9-3cd1661f5461"
+  - email: "user-c@x.x"
+    hash: "$2y$10$y6NxF7kB4Bl27WToSR.3WO1RrA6I5z4RCFlK83alHXNo4uA4wpDl2"
+    username: "user-c"
+    userID: "08a8684b-db88-4b73-90a9-3cd1661f5462"

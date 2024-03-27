@@ -1,0 +1,20 @@
+version: "3.7"
+
+services:
+  dex:
+    image: dexidp/dex
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+    configs:
+      - source: dex_config
+        target: /config.yml
+        uid: "1001"
+        gid: "1001"
+        mode: 0600
+    ports:
+      - "5556:5556"
+    command: [ 'dex', 'serve','/config.yml' ]
+
+configs:
+  dex_config:
+    file: ./dex_config.yml
