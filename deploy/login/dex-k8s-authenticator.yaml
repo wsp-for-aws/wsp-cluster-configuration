@@ -13,10 +13,9 @@ data:
         description: "Example Cluster Long Description..."
         client_secret: ZXhhbXBsZS1hcHAtc2VjcmV0
         issuer: https://dev-dex.k8s-staging.plesk.tech
-        k8s_master_uri: https://api.svc.cluster.local
+        k8s_master_uri: https://192.168.49.2:8443
         client_id: dex-k8s-authenticator
         redirect_uri: http://login.local.host/oauth2/callback
-    #    k8s_ca_uri: https://url-to-your-ca.crt
 ---
 apiVersion: apps/v1
 kind: Deployment
