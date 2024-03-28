@@ -18,4 +18,7 @@ roleRef:
 subjects:
   - apiGroup: rbac.authorization.k8s.io
     kind: User
-    name: 'user-b@x.x'
+    name: 'nikolay.efimov@webpros.com'
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: '[Plesk] rnd-team-wspaws'

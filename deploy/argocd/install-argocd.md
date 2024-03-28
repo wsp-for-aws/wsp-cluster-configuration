@@ -14,7 +14,7 @@ Start minikube
 minikube start
 # OR with OIDC enabled
 minikube start \
-    --extra-config=apiserver.oidc-issuer-url=https://dev-dex.k8s-staging.plesk.tech \
+    --extra-config=apiserver.oidc-issuer-url=https://idp.k8s-staging.plesk.tech \
     --extra-config=apiserver.oidc-client-id=kubelogin \
     --extra-config=apiserver.oidc-username-claim=email \
     --extra-config=apiserver.oidc-groups-claim=groups

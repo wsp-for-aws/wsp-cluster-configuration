@@ -119,21 +119,23 @@ resources:
 namespace: app
 ```
 
-### Change the default resource limits.
+### Grant access a team to the application namespace.
 
 ```bash
-cat <<EOF > resource-limits.yaml
-apiVersion: v1
-kind: ResourceQuota
+cat <<EOF > role-binding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
 metadata:
-  name: resource-limits
+  name: team-access
   namespace: app
-spec:
-    hard:
-        requests.cpu: "3"
-        requests.memory: 1Gi
-        limits.cpu: "4"
-        limits.memory: 2Gi
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: team-developers
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: Group
+    name: '[Plesk] rnd-team-wspaws'
 EOF
 ```
 
@@ -144,9 +146,59 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 resources:
   - ../../default/
-  - resource-limits.yaml
+  - role-binding.yaml
 namespace: app
 ```
 
+## This structure allows us to change the default permissions for a target cluster.
+
+```bash
+CLUSTER_NAME=production
+
+mkdir -p clusters/${CLUSTER_NAME}/cluster-wide
+cd clusters/${CLUSTER_NAME}/cluster-wide
+
+cat <<EOF > role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: wsp
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+EOF
+
+kustomize create --autodelete
+
+
+mkdir -p clusters/${CLUSTER_NAME}/default/
+cd clusters/${CLUSTER_NAME}/default/
+
+cat <<EOF > role-binding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: wsp
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: wsp
+subjects:
+  - kind: ServiceAccount
+    name: wsp-developer
+    namespace: default
+EOF
+
+kustomize create --autodelete
+```
+
+The role allow us to get, list and watch the pods in the cluster. The role binding allows the service account `wsp-developer` to use the role `wsp`.
+It allows to deny edit and delete the pods in the production cluster by default.
 
 [Additional information](./docs/README.md)
