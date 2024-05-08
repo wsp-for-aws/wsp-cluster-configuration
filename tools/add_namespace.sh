@@ -2,6 +2,13 @@
 
 # This script allow to create mandatory files for a new namespace.
 # Usage: ./tools/add_namespace.sh <CLUSTER_NAME> <NAMESPACE_NAME>
+#
+# Generally this script will create the following files based on the template directory:
+# - tools/templates/namespace/*
+#
+# If the target cluster has a namespace_template directory, it will be used as a template directory.
+# For example a custom template for the cluster 'my-cluster' should be placed in:
+# - clusters/my-cluster/namespace_template/*
 
 export CLUSTER_NAME="${1}"
 export NAMESPACE_NAME="${2}"
@@ -17,16 +24,16 @@ CLUSTER_DIR="${ROOT_DIR}/clusters/${CLUSTER_NAME}"
 NAMESPACE_DIR="${CLUSTER_DIR}/namespaces/${NAMESPACE_NAME}"
 
 if [ ! -d "${CLUSTER_DIR}" ]; then
-    echo "Cluster ${CLUSTER_NAME} does not exist"
-    echo "Please create the cluster first"
+    echo "Cluster ${CLUSTER_NAME} does not exist."
+    echo "Please create the cluster first."
     exit 1
 fi
 
 # will be used a template directory from the target cluster if exists
-if [ ! -d "${CLUSTER_DIR}/namespace_template" ]; then
-    TEMPLATE_DIR="${TOOLS_DIR}/templates/namespace"
-else
+if [ -d "${CLUSTER_DIR}/namespace_template" ]; then
     TEMPLATE_DIR="${CLUSTER_DIR}/namespace_template"
+else
+    TEMPLATE_DIR="${TOOLS_DIR}/templates/namespace"
 fi
 echo "Using template directory: ${TEMPLATE_DIR}"
 
