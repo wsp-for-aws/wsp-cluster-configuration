@@ -12,36 +12,12 @@ How to install all in minikube
 
 ```bash
 minikube start
-# OR with OIDC enabled
-minikube start \
-    --extra-config=apiserver.oidc-issuer-url=https://idp.k8s-staging.plesk.tech \
-    --extra-config=apiserver.oidc-client-id=kubelogin \
-    --extra-config=apiserver.oidc-username-claim=email \
-    --extra-config=apiserver.oidc-groups-claim=groups
-```
-
-Enable ingress
-
-```bash
-minikube addons enable ingress
 ```
 
 # Install ArgoCD
 ```bash
 kubectl create namespace argocd
-
-# use kustomize to deploy ArgoCD
-kubectl apply -n argocd -k deploy/argocd
-
-# OR
-
-# use the manifest file to deploy ArgoCD
-kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/master/manifests/install.yaml
-# Setup admin password to 'admin'
-kubectl -n argocd patch secret argocd-secret -p '{"stringData": {
-    "admin.password": "$2a$10$48U85bahwi7Vb4TQeFnvuOBLqhuDuHGvX22IRQYBwOZeCBoUhLV2K",
-    "admin.passwordMtime": "'$(date +%FT%T%Z)'"
-  }}'
+kubectl apply -n argocd --kustomize deploy/argocd
 ```
 
 Port forward to argocd server
@@ -54,16 +30,9 @@ Login via CLI argocd
 argocd login localhost:8080 --username admin --password admin --insecure
 ```
 
-Add minikube cluster to argocd with name `wsp-dev-cluster` by cluster-admin role
+Add minikube cluster to argocd with name `wsp-dev-cluster` by `cluster-admin` role
 ```bash
-argocd cluster add minikube --name wsp-dev-cluster --insecure
-```
-
-Add a dev cluster to argocd with name `wsp-dev-cluster` by a custom service account
-```bash
-KUBECONFIG="/home/nixer/.kube/config.k8s.dev:${KUBECONFIG}" 
-
-argocd cluster add dev-admin@dev --name wsp-dev-cluster --insecure --service-account wsp-cd --system-namespace wsp-ns
+argocd cluster add minikube --name dev --insecure
 ```
 
 Open ArgoCD UI in browser

@@ -1,9 +1,3 @@
-Documentation
-=
-
-Index of documentation files:
-
-- How to ... (see directory `examples`).
-- [Deploy ArgoCD ApplicationSet](./install-appsets.md).
-- [Install ArgoCD](../deploy/README.md).
-- [Kustomize](./kustomize.md).
+This directory contains examples of main user cases that can be useful for the application namespace configuration
+into a directory `clusters/{CLUSTER_NAME}/namespaces/{NAMESPACE_NAME}`
+and tips for using [kustomize](kustomize-tips.md)

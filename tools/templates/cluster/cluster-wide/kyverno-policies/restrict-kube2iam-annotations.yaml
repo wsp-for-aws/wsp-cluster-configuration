@@ -20,7 +20,7 @@ spec:
         - name: mapAllowedAssumeRole
           configMap:
             name: kube2iam-access
-            namespace: wsp-ns
+            namespace: wsp-system
         - name: map_ns_and_roles
           variable:
             jmesPath: 'parse_yaml(mapAllowedAssumeRole.data.allowFor)'
@@ -68,7 +68,7 @@ spec:
         - name: mapAllowedAssumeRole
           configMap:
             name: kube2iam-access
-            namespace: wsp-ns
+            namespace: wsp-system
         - name: map_ns_and_roles
           variable:
             jmesPath: 'parse_yaml(mapAllowedAssumeRole.data.allowFor)'

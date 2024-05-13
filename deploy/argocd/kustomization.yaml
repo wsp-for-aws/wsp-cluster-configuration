@@ -4,7 +4,7 @@ namespace: argocd
 resources:
   - https://raw.githubusercontent.com/argoproj/argo-cd/v2.10.7/manifests/install.yaml
 patches:
-  # Specify the admin password for the ArgoCD UI (admin)
+  # Specify the admin password for the ArgoCD UI
   - target:
       version: v1
       kind: Secret
@@ -13,25 +13,5 @@ patches:
       - op: add
         path: "/stringData"
         value:
-          "admin.password": "$2a$10$48U85bahwi7Vb4TQeFnvuOBLqhuDuHGvX22IRQYBwOZeCBoUhLV2K"
+          "admin.password": "$2a$10$48U85bahwi7Vb4TQeFnvuOBLqhuDuHGvX22IRQYBwOZeCBoUhLV2K"   # "admin"
           "admin.passwordMtime": "2021-09-01T00:00:00Z"
-  - target:
-      kind: Deployment
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/imagePullPolicy
-        value: IfNotPresent
-  - target:
-      kind: Deployment
-      name: argocd-dex-server
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/initContainers/0/imagePullPolicy
-        value: IfNotPresent
-  - target:
-      kind: StatefulSet
-      name: argocd-application-controller
-    patch: |-
-      - op: replace
-        path: /spec/template/spec/containers/0/imagePullPolicy
-        value: IfNotPresent

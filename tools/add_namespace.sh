@@ -5,10 +5,6 @@
 #
 # Generally this script will create the following files based on the template directory:
 # - tools/templates/namespace/*
-#
-# If the target cluster has a namespace_template directory, it will be used as a template directory.
-# For example a custom template for the cluster 'my-cluster' should be placed in:
-# - clusters/my-cluster/namespace_template/*
 
 export CLUSTER_NAME="${1}"
 export NAMESPACE_NAME="${2}"
@@ -18,24 +14,17 @@ if [ -z "${CLUSTER_NAME}" ] || [ -z "${NAMESPACE_NAME}" ]; then
     exit 1
 fi
 
-TOOLS_DIR=$(realpath $(dirname "${0}"))
-ROOT_DIR=$(dirname "${TOOLS_DIR}")
-CLUSTER_DIR="${ROOT_DIR}/clusters/${CLUSTER_NAME}"
-NAMESPACE_DIR="${CLUSTER_DIR}/namespaces/${NAMESPACE_NAME}"
+export TOOLS_DIR=$(realpath $(dirname "${0}"))
+export ROOT_DIR=$(dirname "${TOOLS_DIR}")
+export CLUSTER_DIR="${ROOT_DIR}/clusters/${CLUSTER_NAME}"
+export NAMESPACE_DIR="${CLUSTER_DIR}/namespaces/${NAMESPACE_NAME}"
+export TEMPLATE_DIR="${TOOLS_DIR}/templates/namespace"
 
 if [ ! -d "${CLUSTER_DIR}" ]; then
     echo "Cluster ${CLUSTER_NAME} does not exist."
     echo "Please create the cluster first."
     exit 1
 fi
-
-# will be used a template directory from the target cluster if exists
-if [ -d "${CLUSTER_DIR}/namespace_template" ]; then
-    TEMPLATE_DIR="${CLUSTER_DIR}/namespace_template"
-else
-    TEMPLATE_DIR="${TOOLS_DIR}/templates/namespace"
-fi
-echo "Using template directory: ${TEMPLATE_DIR}"
 
 # check if the namespace already exists
 if [ -d "${NAMESPACE_DIR}" ]; then
@@ -47,15 +36,22 @@ if [ -d "${NAMESPACE_DIR}" ]; then
     else
         echo "Exit" && exit 1
     fi
+else
+    echo "Creating namespace ${NAMESPACE_NAME} in cluster ${CLUSTER_NAME}..."
+    mkdir -p "${NAMESPACE_DIR}"
 fi
 
 # create the target directory
-mkdir -p "${NAMESPACE_DIR}"
+for dir in $(find "${TEMPLATE_DIR}" -mindepth 1 -type d); do
+    mkdir -p "${CLUSTER_DIR}/${dir#${TEMPLATE_DIR}/}"
+done
 
 # Render the templates to the namespace directory
-find "${TEMPLATE_DIR}" -type f -exec bash -c 'envsubst < "${0}" > "${0/$1/$2}"' {} "${TEMPLATE_DIR}" "${NAMESPACE_DIR}" \;
+find "${TEMPLATE_DIR}" -type f -exec bash -c 'echo "  ${0#"$TEMPLATE_DIR/"} - copied" ; envsubst < "${0}" > "${0/$1/$2}"' {} "${TEMPLATE_DIR}" "${NAMESPACE_DIR}" \;
 
+echo ""
 echo "Layout for the cluster ${CLUSTER_NAME} has been created in ${CLUSTER_DIR}"
 
+echo "---"
 echo "Don't forget to save the new configuration in the Git repository."
 git status || true

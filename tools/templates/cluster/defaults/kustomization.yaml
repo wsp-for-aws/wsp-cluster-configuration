@@ -8,5 +8,5 @@ commonLabels:
 resources:
   - ns.target.yaml
   - cnp.allow-traffic-within-namespace.yaml
-  - rq.wsp.yaml
-  - rb.wsp-cd.yaml
+  - rolebinding.wsp-cd.yaml
+  - quota.ns-limits.yaml

@@ -1,44 +1,42 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: wsp-sync-${CLUSTER_NAME}-cluster-infra
+  name: wsp-${CLUSTER_NAME}-configuration
   namespace: argocd
 spec:
   syncPolicy:
-    preserveResourcesOnDeletion: true # ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/
+    # ApplicationSet will not cascade delete resources when the application is deleted
+    # ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/
+    preserveResourcesOnDeletion: true
   goTemplate: true
   goTemplateOptions: [ "missingkey=error" ] # ref: https://pkg.go.dev/text/template#Template.Option
   generators:
     - git:
-        # repoURL: https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git
-        repoURL: https://github.com/wsp-for-aws/wsp-cluster-configuration.git
+        repoURL: https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git
         revision: master
         directories:
-          - path: clusters/${CLUSTER_NAME}/namespaces/*
           - path: clusters/${CLUSTER_NAME}/cluster-wide
+          - path: clusters/${CLUSTER_NAME}/namespaces/*
   template:
     metadata:
-      name: 'cluster-{{index .path.segments 1}}-ns-{{.path.basename}}'
+      name: '{{ index .path.segments 1 }}-ns-{{ .path.basename }}'
       labels:
-        wsp.io/application-name: '{{.path.basename}}'
-        wsp.io/environment: '{{index .path.segments 1}}'
+        wsp.io/application: '{{ .path.basename }}'
+        wsp.io/destination: '{{ index .path.segments 1 }}'
     spec:
       project: default
       source:
-        # repoURL: https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git
-        repoURL: https://github.com/wsp-for-aws/wsp-cluster-configuration.git
+        repoURL: https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git
         targetRevision: master
-        path: '{{.path.path}}'
+        path: '{{ .path.path }}'
       destination:
-        # TODO: We need to use a correct target cluster by the name
-        #  name: 'wsp-{{index .path.segments 1}}-cluster'
-        #  OR
-        #  server: https://kubernetes.default.svc
-        name: 'wsp-{{index .path.segments 1}}-cluster'
+        name: '{{ index .path.segments 1 }}'
         namespace: ''
       syncPolicy:
         automated:
+          # Application will not destroy resources that are not in the Git repository
           prune: false
+          # Application will self-heal if the live state does not match the desired state
           selfHeal: true
         syncOptions:
           - CreateNamespace=true

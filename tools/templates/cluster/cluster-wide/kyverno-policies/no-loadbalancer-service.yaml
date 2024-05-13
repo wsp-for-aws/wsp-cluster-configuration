@@ -24,6 +24,17 @@ spec:
           - resources:
               kinds:
                 - Service
+      preconditions:
+        all:
+          - key: "{{ request.operation || 'BACKGROUND' }}"
+            operator: AnyIn
+            value:
+              - CREATE
+              - UPDATE
+          - key: "{{request.object.metadata.namespace}}"
+            operator: AnyNotIn
+            value:
+              - kube-system
       validate:
         message: "Service of type LoadBalancer is not allowed."
         pattern:
