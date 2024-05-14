@@ -17,7 +17,7 @@ minikube start
 # Install ArgoCD
 ```bash
 kubectl create namespace argocd
-kubectl apply -n argocd --kustomize deploy/argocd
+kubectl apply -n argocd --kustomize dev/deploy/argocd
 ```
 
 Port forward to argocd server

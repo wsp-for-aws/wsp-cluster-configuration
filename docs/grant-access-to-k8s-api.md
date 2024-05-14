@@ -105,5 +105,5 @@ kubectl -n <target-namespace> auth can-i get secrets --as=system:serviceaccount:
 ## Additional resources
 
 We prepare an example resource that can demonstrate the ability to manage resources in your namespace.
-[A job check access to the Kubernetes API](check-access-to-k8s-api.yaml) is a Job that checks the ability to
+[A job check access to the Kubernetes API](/dev/check-access-to-k8s-api.yaml) is a Job that checks the ability to
 access the Kubernetes API. To check the access, you need to run the Job in the namespace.

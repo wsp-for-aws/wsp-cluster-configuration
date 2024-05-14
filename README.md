@@ -1,217 +1,162 @@
-WSP Cluster configuration
-=
+# WSP cluster configuration
 
-This repository contains the necessary Kubernetes resources required for client applications.
-Throughout an application's lifecycle, a certain set of cluster resources must be consistently available.
-For instance, in each application namespace, it is essential to establish default resource limits, permissions,
-network policies, and so on, collectively referred to as "defaults."
-Additionally, there must be the ability to modify these defaults (through an approval process)
-for individual applications.
+WSP is a Kubernetes-based hosting platform for applications. During the lifecycle of an application, there is a need
+for additional cluster resources that, although not part of the application itself, play an important supporting role.
+For example, it is essential to have default resource limits, permissions and network policies in each application
+namespace.
 
-# Delivery process
+This repository contains all such resources for all WSP clusters. Most are security or resource management related
+policies, so changes require an approval. Having them in one Git repository allows to make any customization on a
+per-cluster or per-application basis in a controlled and manageable way using standard GitOps practices.
 
-The cluster resources are stored in a Git repository, adhering to the principles of Infrastructure as Code (IaC).
-All resources will be automatically provisioned to WSP clusters.
-The delivery process relies on [ArgoCD](https://argoproj.github.io/argo-cd/) (ApplicationSet, Application).
+# Under the hood
 
-The ArgoCD
-[ApplicationSet](https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/#the-applicationset-resource)
-monitors changes in the repository and creates several ArgoCD Applications
-for a cluster—one Application to deploy the cluster-wide resources and individual Applications
-for each application namespace.
-We prepare an `application-set.yaml` file for each cluster, which contains the configuration of the ApplicationSet
-(see the structure below).
+This section briefly describes the tools used in the repository and their purpose.
 
-The ArgoCD [Applications](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#applications),
-in turn, will sync all Kubernetes resources from the source directory to the cluster.
-Each Application displays the status of the synchronization and the list of resources that will be deployed.
-At this time, the ArgoCD Applications can create and modify resources in the cluster but not delete them.
-This safety feature prevents accidental resource deletion. Resources created at one time but later removed
-from the repository will be marked as `Orphaned` in the ArgoCD UI.
+## ArgoCD
 
-# Customization resources
+[ArgoCD](https://argo-cd.readthedocs.io/en/stable/) is in charge of the resource delivery process. It tracks changes
+in the repository and automatically applies them to WSP clusters.
 
-We are required not only to add resources like network policies or permissions but also, occasionally,
-to modify default resources such as resource quotas, namespace annotations, etc.
-Important criteria for us include readability, simplicity, and flexibility in our scenarios.
+Specifically, [ArgoCD Applications](https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#applications)
+sync all Kubernetes resources from a specific source directory to a specific cluster, displaying both configuration
+drift and synchronization status. For WSP clusters, we use one ArgoCD application for all cluster-wide resources and
+one ArgoCD application for each individual application namespace. The process is fully automated using an
+[ArgoCD ApplicationSet](https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/#the-applicationset-resource),
+which creates an ArgoCD application when a new application namespace is created.
 
-To address this task, we decided to use [Kustomize](https://kubectl.docs.kubernetes.io/installation/kustomize/),
-a tool that provides the desired flexibility and operates in an imperative mode.
-This tool has comprehensive documentation, supports debugging, and allows developers to preview
-outcomes before deployment. Its core functionality is integrated into kubectl, confirming its popularity and relevance
-within the DevOps community.
-The ArgoCD Application also supports Kustomize as a resource source.
+## Kustomize
 
-The `kustomization.yaml` file is mandatory and must be present in the target resource directory.
-This file contains all instructions for using, importing, and transforming Kubernetes resources.
+It is easy to add new resources to this repository to be delivered by ArgoCD, but sometimes we also need to be able to
+modify existing ones (for example, change default resource limits for a specific application namespace).
+To do this we use [Kustomize](https://kubectl.docs.kubernetes.io/references/kustomize/).
 
-## Enforcement policies
+Kustomize provides a template-free way to customize resource configuration using patches to make specific modifications
+of the same Kubernetes resources without touching them. The term *kustomization* refers to a kustomization.yaml file
+containing a list of resources and patch rules to be applied. One kustomization can include the other one as a base and
+modify resources as needed. Kustomize is built into kubectl and ArgoCD also has native support for it.
 
-We use [Kyverno](https://kyverno.io/) to enforce policies in the Kubernetes cluster.
-Kyverno allows us to validate, mutate, and generate resources.
-We use it to control the creation of resources, enforce best practices, and ensure compliance with security policies.
-For example, we can restrict the creation of resources with specific labels or annotations, enforce naming conventions,
-etc.
+## Kyverno
 
-## Network policies
+[Kyverno](https://kyverno.io/) is a policy engine for Kubernetes. We use it to control resource creation and ensure
+workload compliance with internally accepted policies (such as naming conventions or security rules) by blocking or
+mutating API requests.
 
-To manage networking in and out of a namespace, we use the [Cilium](https://cilium.io/) eBPF-based networking solution.
-Cilium provides a NetworkPolicy API that allows you to define how your application communicates with other services.
-The Cilium network policies can be applied to the cluster-wide resources and the application namespaces.
-Now we allow internal traffic between services in the same namespace and traffic between a service and
-an ingress controller. The other traffic is denied by default.
+You can use Kyverno policies to validate, mutate, generate, and clean up Kubernetes resources. Moreover, policies
+themselves are Kubernetes resources, so you can use familiar tools such as kubectl, git, and kustomize to manage them as
+code. Specifically, we keep most of Kyverno policies as cluster-wide resources within the repository and deliver them
+by ArgoCD. Kyverno CLI can be used to test policies before applying them to a cluster.
 
-## CLI tools
+## Cilium
 
-- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/)
-- [kustomize](https://kubectl.docs.kubernetes.io/installation/kustomize/binaries/) (optional)
-- [argocd](https://argo-cd.readthedocs.io/en/stable/#quick-start) (optional)
-- [kyverno](https://kyverno.io/docs/kyverno-cli/) (optional)
-- [cilium](https://docs.cilium.io/en/stable/gettingstarted/k8s-install-default/#install-the-cilium-cli) (optional)
+Just as we use Kyverno to enforce a policy, we rely on [Cilium](https://cilium.io/) to control how an application is
+allowed to communicate with other services by defining its own ingress and egress rules.
 
-# Structure clusters and resources
+Cilium is an open source, eBPF-based solution for providing, securing, and observing network connectivity between
+workloads. Because eBPF runs inside the Linux kernel, Cilium policies can be applied and updated without any changes to
+the application code or container configuration. We use Cilium CNI in all WSP clusters, so extended Cilium network
+policies can be safely used to allow specific traffic both inside and outside an application namespace.
 
-The repository is structured as follows:
+# Repository structure
+
+The configuration within the repository is structured as follows:
 
 ```
-clusters/                            # The root directory for all the target clusters
-└── {cluster-name}/                  # dev, staging, prod-eu, etc.
-    ├── application-set.yaml         # The ArgoCD ApplicationSet that allow to deploy the cluster resources
+clusters/                            # The root directory for all cluster configurations
+└── {cluster-name}/                  # The specific cluster to be configured (dev, staging, internal, production)
+    ├── application-set.yaml         # The ArgoCD ApplicationSet that automatically creates and deletes ArgoCD Applications for the cluster
     │
     ├── cluster-wide/                # The directory for cluster-wide resources
-    │   ├── kyverno-policies/        # The Kyverno policies with the rules to enforce the WSP's policies
+    │   ├── kyverno-policies/        # Global WSP policies
     │   ├── {resource-name}.yaml     # ClusterRole, ClusterRoleBinding, CiliumClusterwideNetworkPolicy, etc.
-    │   └── kustomization.yaml       # The kustomization file for the cluster-wide resources
+    │   └── kustomization.yaml       # The kustomization for cluster-wide resources
     │
-    ├── defaults/                    # The directory for base resources that are common for all application namespaces
-    │   ├── {resource-name}.yaml     # Namespace, ResourceQuote, CiliumNetworkPolicy, RoleBinding, etc.
-    │   └── kustomization.yaml       # The kustomization file required to import the directory 'defaults' as a base for the namespace resources
+    ├── defaults/                    # The directory for resources common for all application namespaces
+    │   ├── {resource-name}.yaml     # Namespace, RoleBinding, ResourceQuote, CiliumNetworkPolicy, etc.
+    │   └── kustomization.yaml       # The kustomization for default resources (intended to be used as a base for namespaces)
     │
-    └── namespaces/                  # The directory is a list of namespaces related to WSP and client applications
-        └── {namespace-name}/        # app-name, monitoring, wsp-system, etc.
-            ├── {resource-name}.yaml # Override the default resources or/add new resources
-            └── kustomization.yaml   # The kustomization file for import defaults, rules to override the them and add new resources
+    └── namespaces/                  # The list of namespaces within the cluster to be configured
+        └── {namespace-name}/        # The specific application namespace (leika, lumin, report-portal)
+            ├── {resource-name}.yaml # Any namespace-scoped resource (optional, if needed)
+            └── kustomization.yaml   # The kustomization for namespace resources (can import defaults, patch them and/or add new resources)
+        └── wsp-system/              # The system namespace with internal WSP configuration (required resources)
 ```
 
-This structure allows you to manage cluster-wide resources, defaults, and application resources
-in each target cluster. Each cluster can have different cluster-wide resources or defaults.
+This structure allows you to manage cluster-wide resources, default resources, and application resources separately on
+a per-cluster basis.
 
-## Naming conventions for resources
+## Naming conventions
 
-When you create a new resource (or patch for a resource), you should follow the naming conventions:
+When you add a new resource to this repository please respect the following rules:
+- File names must be in lowercase and match the `{resource-type}.{resource-name}.yaml` pattern
+- Use the *short name* of the resource type if it has a common one, or the *name* otherwise (check `kubectl api-resources` output)
+- Use hyphens as a word separator within the resource name
 
-- File names should be in lowercase and use dots to separate parts of the name.
-  The file name should consist of three parts: `{prefix}.{name}.{extension}`.
-  For example, `ns.app-name.yaml`, `rolebinding.admin.yaml`, etc.
+For example, `ns.report-portal.yaml`, `rolebinding.admin.yaml`.
 
-  * For prefixes, use the following rules:
-    1. Use a short name of the resource type if it is a common resource (e.g., `ns` for Namespace).
-       You can see shortnames in the output of the `kubectl api-resources` command.
-    2. Otherwise, use the full name of the resource type (e.g., `job` for Job, `role` for Role, etc.).
-  * For the name part, use the name of the resource.
-  * And the extension should be `yaml`.
-- Each file name of a resource should be unique within the directory.
+# Usage
 
-# Configuration of ArgoCD server
+Note that all use cases described below assume that:
+1. You already have an ArgoCD instance configured to track changes to this repository, and
+2. A cluster you want to modify has already been added to the repository and the ArgoCD instance.
 
-## Access to this Git repository
+If this is not the case, and you want to add or remove a cluster or contribute to the code, please
+refer to the [developer](dev/README.md) documentation instead.
 
-The ArgoCD server should be configured to connect
-to [the Git repository](https://argo-cd.readthedocs.io/en/stable/user-guide/private-repositories/#private-repositories).
-This required to allow use this repository as a source of the ArgoCD ApplicationSet and Applications.
+## Add a new namespace
 
-To add a new repository to the ArgoCD server, you can use the argocd CLI command:
+Before deploying an application to a WSP cluster, you must create a namespace for it. Depending on the architecture,
+each application may have its own namespace, or multiple applications may share the same namespace. That is why we are
+focusing on namespace configuration here.
 
-```bash
-argocd repo add {GIT_URL} --username {USERNAME} --password {PASSWORD}
-```
-
-## Access to target clusters
-
-ArgoCD should have access to the
-target [clusters](https://argo-cd.readthedocs.io/en/stable/operator-manual/cluster-management/) and be able to deploy
-the resources to the cluster.
-To add a new cluster to the ArgoCD server, you need to provide the cluster name and a service account in the
-target cluster that will be used to deploy the resources. The service account should have the `cluster-admin` role.
-
-```bash
-argocd cluster add {KUBECONFIG_CONTEXT_NAME} --name {CLUSTER_NAME} --serviceaccount argocd-manager --namespace kube-system
-```
-
-The CLI-command `argocd` can create a new service account in the target cluster
-with the name `argocd-manager` in the `kube-system` namespace when you do not provide the service account name.
-
-```bash
-argocd cluster add {KUBECONFIG_CONTEXT_NAME} --name {CLUSTER_NAME}
-```
-
-# Generate resources for a new cluster
-
-When you have a target Kubernetes cluster, you need to prepare WSP resources for that cluster.
-These resources include: cluster-wide resources, defaults, and some WSP resources for it to work correctly.
-
-## Preconditions
-
-- The ArgoCD server should be configured to connect to the Git repository.
-- The ArgoCD server should have access to the target cluster.
-
-## Generate resources
-
-To generate the resources, you can use the following command:
-
-```bash
-tools/add_cluster.sh {CLUSTER_NAME}
-```
-
-This command will create all the necessary directories and files for the new cluster according to
-the structure described above.
-
-## Save changes to the Git repository
-
-After you have added the resources, you need to commit and push the changes to the Git repository.
-
-## Add ApplicationSet to the ArgoCD
-
-After generating the resources you receive the `clusters/{CLUSTER_NAME}/application-set.yaml` file.
-This file contains the configuration of the ArgoCD ApplicationSet that will be used to deploy the cluster resources.
-It is necessary to add this file to the ArgoCD server.
-
-```bash
-kubectl -n argocd apply -f clusters/{CLUSTER_NAME}/application-set.yaml
-```
-
-After successful applying the ApplicationSet, the ArgoCD server will create the Applications for the cluster.
-You can see the list of the Applications and the status of the synchronization in the ArgoCD UI.
-
-# Adding a new namespace to the cluster
-
-When we have a target cluster you need to create a new namespace for each new application.
-One namespace can have one or more clients applications. It depends on the application architecture.
-
-To add a new namespace to a cluster, you can use the following command:
+To create a namespace, you need to add the corresponding resource, which will be delivered by ArgoCD, in the correct
+path according to the [repository structure](#Repository-structure). Typically, in addition to the namespace itself,
+you also want to add some default resources to it. To reuse existing per-cluster defaults, you need to add an
+appropriate kustomization. For this most typical case you can use the following helper script:
 
 ```bash
 tools/add_namespace.sh {CLUSTER_NAME} {NAMESPACE_NAME}
 ```
 
-You receive a new kustomization file into the `clusters/{CLUSTER_NAME}/namespaces/{NAMESPACE_NAME}` directory.
-If you want to change the default resource set that will be delivered to the application namespace, you can add new
-resources, override or remove the default resources with help of the `kustomization.yaml`.
-More information about the kustomization file can be found
-[here](https://kubectl.docs.kubernetes.io/references/kustomize/).
+The script will generate a skeleton for you in the `clusters/{CLUSTER_NAME}/namespaces/{NAMESPACE_NAME}` directory,
+overwriting all existing files (if any). To see the generated resources run the following command:
 
-# How to
+```bash
+kubectl kustomize clusters/{CLUSTER_NAME}/namespaces/{NAMESPACE_NAME}
+```
 
-We have prepared some examples to resolve usual tasks that can be required during the application lifecycle:
+Once you have reviewed the result and are satisfied with it, you should create a branch, commit the changes and open a
+pull request. When ths pull request is approved and merged, ArgoCD will notice the changes and apply them. The
+ApplicationSet controller will create a new Application for the new directory, which in turn will create the namespace
+itself and other resources in the cluster.
 
-- [Grant access for a user / a team to the application namespace using OIDC](./docs/grant-access-by-oidc.md)
-- [Allow custom network connections outside the namespace](./docs/allow-for-external-connections.md)
-- [Modify the namespace resources limits](./docs/change-ns-resources-limits.md)
-- [Modify the permissions that required to deploy an application](./docs/modify-cd-permissions)
-- [Grant access a service account to the Kubernetes API](./docs/grant-access-to-k8s-api.md)
-- [Assume an AWS role in the application namespace](./docs/using-kube2iam.md)
-- [Expose the application service to the internet](./docs/expose-service.md)
+Note that you can use a similar flow for namespaces that already exist in the cluster (for example, deliver resources
+to `kube-system`). In this case, you should not use the script, but manually create the directory and resources (except
+for the namespace) in the repository. You can still use kustomize or just put raw manifests there (make sure they are
+not partial and will pass the API validation).
 
-## Developer information
+## Modify resources
 
-- [Install dev instance of ArgoCD.](./deploy/README.md)
+By committing to this repository, you can add, change, or remove both namespace-scoped and cluster-wide resources within
+an existing cluster. Kustomize offers very flexible options for modifying resources. You can learn more in the official
+[guide](https://kubectl.docs.kubernetes.io/references/kustomize/) or check out our own [recipes](/dev/kustomize-tips.md).
+
+To make it easier to get started, we have prepared guides for the most common tasks:
+
+- [Grant access to an application namespace to a user or group using OIDC](/docs/grant-access-by-oidc.md)
+- [Change resource limits for an application namespace](/docs/change-ns-resources-limits.md)
+- [Allow custom network connections within the cluster](/docs/allow-for-external-connections.md)
+- [Allow to deploy an application with resources that require approval](/docs/modify-cd-permissions)
+- [Allow to assume an AWS role in an application namespace](/docs/using-kube2iam.md)
+- [Grant access to the Kubernetes API for an application](/docs/grant-access-to-k8s-api.md)
+- [Allow an application to expose TCP or UDP ports to the Internet](/docs/expose-service.md)
+
+## Delete a namespace
+
+When you completely delete an application from a cluster, you also need to delete its namespace from this repository.
+Once the directory is deleted, the ApplicationSet controller will delete the ArgoCD application, which in turn will
+delete all the resources created by ArgoCD and the namespace itself at the end.
+
+Note that if the namespace contains resources created externally (not by ArgoCD), the namespace will be preserved as
+well as the ArgoCD application (in `ERROR` status). Other resources owned by ArgoCD will be deleted. In this case, it
+is your responsibility to clean up the external resources and then delete the ArgoCD Application manually.
