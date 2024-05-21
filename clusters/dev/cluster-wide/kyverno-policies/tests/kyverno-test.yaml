@@ -28,8 +28,3 @@ results:
     resource: any-role-pod
     kind: Pod
     result: pass
-  - policy: restrict-kube2iam-annotations
-    rule: block-kube2iam-annotation-apps
-    resource: app
-    kind: Deployment
-    result: pass

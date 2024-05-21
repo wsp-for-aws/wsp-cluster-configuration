@@ -1,0 +1,79 @@
+  apiVersion: kyverno.io/v1
+  kind: ClusterPolicy
+  metadata:
+    name: prevent-namespace-deletion
+    annotations:
+      policies.kyverno.io/title: Restrict deletion of namespaces with existing resources
+      policies.kyverno.io/category: WSP
+      policies.kyverno.io/minversion: 0.0.1
+      policies.kyverno.io/subject: Namespace, PVC
+      policies.kyverno.io/description: >-
+          This policy checks if a namespace has existing resources before allowing deletion.
+          It prevents deletion of namespaces with existing resources.
+      pod-policies.kyverno.io/autogen-controllers: None
+  spec:
+    validationFailureAction: Enforce
+    background: false
+    rules:
+      - name: check-resources-before-namespace-deletion
+        match:
+          any:
+            - resources:
+                kinds:
+                  - Namespace
+        preconditions:
+          all:
+            - key: "{{ request.operation || 'BACKGROUND' }}"
+              operator: Equals
+              value: DELETE
+        exclude:
+          any:
+            - subjects:
+                - kind: Group
+                  name: '[Plesk] rnd-team-devops'
+        context:
+          - name: pvc_resources
+            apiCall:
+              urlPath: "/api/v1/namespaces/{{ request.object.metadata.name }}/persistentvolumeclaims"
+          - name: secret_resources
+            apiCall:
+              urlPath: "/api/v1/namespaces/{{ request.object.metadata.name }}/secrets"
+        validate:
+          message: |
+            Cannot delete namespace with existing resources:
+            PVCs: {{ pvc_resources.items[*].metadata.name }}
+            Secrets: {{ secret_resources.items[*].metadata.name }}
+          deny:
+            conditions:
+              any:
+                - key: "{{ length(pvc_resources.items) }}"
+                  operator: GreaterThan
+                  value: 0
+                - key: "{{ length(secret_resources.items) }}"
+                  operator: GreaterThan
+                  value: 0
+      - name: check-resources-before-namespace-deletion-tmp
+        match:
+          any:
+            - resources:
+                kinds:
+                  - RoleBinding
+        preconditions:
+          all:
+            - key: "{{ request.operation }}"
+              operator: Equals
+              value: DELETE
+        context:
+          - name: pvc_resources
+            apiCall:
+              urlPath: "/api/v1/namespaces/{{ request.object.metadata.namespace }}/persistentvolumeclaims"
+        validate:
+          message: |
+            Cannot delete namespace with existing resources:
+            PVCs: {{ pvc_resources.items[*].metadata.name }}
+          deny:
+            conditions:
+              any:
+                - key: "{{ length(pvc_resources.items) }}"
+                  operator: GreaterThan
+                  value: 0

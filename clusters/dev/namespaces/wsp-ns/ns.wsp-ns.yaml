@@ -4,3 +4,5 @@ metadata:
   name: wsp-ns
   labels:
     wsp.io/instance: dev-wsp-instance
+#  annotations:
+#    argocd.argoproj.io/sync-options: Delete=false

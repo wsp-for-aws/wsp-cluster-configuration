@@ -12,3 +12,4 @@ resources:
   - sa.wsp-cd.yaml
   - secret.wsp-cd-token.yaml
   - cm.kube2iam-access.yaml
+#  - pvc.test.yaml

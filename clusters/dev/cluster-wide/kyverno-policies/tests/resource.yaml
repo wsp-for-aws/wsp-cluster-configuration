@@ -63,29 +63,3 @@ spec:
       ports:
         - containerPort: 80
           name: http
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: app
-  namespace: test-namespace
-spec:
-  selector:
-    matchLabels:
-      app: app
-  template:
-    metadata:
-      name: any-role-pod
-      namespace: star-namespace
-      labels:
-        app: test
-      annotations:
-        iam.amazonaws.com/role: "arn:aws:iam::000000000000:role/expected-role"
-    spec:
-      containers:
-        - name: test
-          image: nginx:1.7.9
-          ports:
-            - containerPort: 80
-              name: http

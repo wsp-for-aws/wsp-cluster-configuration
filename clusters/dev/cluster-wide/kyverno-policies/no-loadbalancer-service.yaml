@@ -15,7 +15,7 @@ metadata:
       overrun established budgets and security practices set by the organization. This policy restricts
       use of the Service type LoadBalancer.
 spec:
-  validationFailureAction: Enforce
+  validationFailureAction: enforce
   background: true
   rules:
     - name: no-LoadBalancer
@@ -25,10 +25,16 @@ spec:
               kinds:
                 - Service
       preconditions:
-        - key: "{{request.object.metadata.namespace}}"
-          operator: AnyNotIn
-          value:
-            - expose-svc
+        all:
+          - key: "{{ request.operation || 'BACKGROUND' }}"
+            operator: AnyIn
+            value:
+              - CREATE
+              - UPDATE
+          - key: "{{request.object.metadata.namespace}}"
+            operator: AnyNotIn
+            value:
+              - kube-system
       validate:
         message: "Service of type LoadBalancer is not allowed."
         pattern:
