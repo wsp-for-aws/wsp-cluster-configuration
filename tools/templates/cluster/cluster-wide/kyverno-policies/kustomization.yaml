@@ -5,6 +5,7 @@ resources:
   ## Source of the several policies: https://kyverno.io/policies/
   - add-default-requests.yaml
   - no-loadbalancer-service.yaml
+  - prevent-namespace-deletion.yaml
   - restrict-ingress-wildcard.yaml
   - restrict-kube2iam-annotations.yaml
   - unique-external-dns.yaml

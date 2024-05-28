@@ -43,6 +43,11 @@ find "${TEMPLATE_DIR}" -type f -exec bash -c 'echo "  ${0#"$TEMPLATE_DIR/"} - co
 echo ""
 echo "Layout for the cluster ${CLUSTER_NAME} has been created in ${CLUSTER_DIR}"
 
+echo ""
+echo "Don't forget to apply the ArgoCD ApplicationSet for the ${CLUSTER_NAME} cluster:"
+echo "  kubectl -n argocd apply -f clusters/${CLUSTER_NAME}/application-set.yaml"
+echo ""
+
 echo "---"
 echo "Don't forget to save the new configuration in the Git repository."
 git status || true

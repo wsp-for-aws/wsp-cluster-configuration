@@ -4,12 +4,10 @@ metadata:
   name: wsp-${CLUSTER_NAME}-configuration
   namespace: argocd
 spec:
-  syncPolicy:
-    # ApplicationSet will not cascade delete resources when the application is deleted
-    # ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/applicationset/Controlling-Resource-Modification/
-    preserveResourcesOnDeletion: true
   goTemplate: true
   goTemplateOptions: [ "missingkey=error" ] # ref: https://pkg.go.dev/text/template#Template.Option
+  syncPolicy:
+    applicationsSync: create-delete
   generators:
     - git:
         repoURL: https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git
@@ -19,10 +17,10 @@ spec:
           - path: clusters/${CLUSTER_NAME}/namespaces/*
   template:
     metadata:
-      name: '{{ index .path.segments 1 }}-ns-{{ .path.basename }}'
+      name: '{{ if gt (len .path.segments) 3 }}{{index .path.segments 3}}-to{{ else }}clusters-wide-resources-for{{ end }}-{{index .path.segments 1}}'
       labels:
-        wsp.io/application: '{{ .path.basename }}'
-        wsp.io/destination: '{{ index .path.segments 1 }}'
+      wsp.io/application: '{{ .path.basename }}'
+      wsp.io/destination: '{{ index .path.segments 1 }}'
     spec:
       project: default
       source:
@@ -31,12 +29,12 @@ spec:
         path: '{{ .path.path }}'
       destination:
         name: '{{ index .path.segments 1 }}'
-        namespace: ''
+        namespace: '{{ if gt (len .path.segments) 3 }}{{index .path.segments 3}}{{ else }}{{ end }}'
       syncPolicy:
         automated:
-          # Application will not destroy resources that are not in the Git repository
-          prune: false
-          # Application will self-heal if the live state does not match the desired state
+          prune: true
           selfHeal: true
         syncOptions:
-          - CreateNamespace=true
+          - ApplyOutOfSyncOnly=true
+          - CreateNamespace=false
+          - FailOnSharedResource=true

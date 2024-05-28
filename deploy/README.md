@@ -38,3 +38,9 @@ argocd cluster add minikube --name dev --insecure
 Open ArgoCD UI in browser
 
 http://localhost:8080
+
+# Install Kyverno (optional)
+
+```bash
+kubectl create -f https://github.com/kyverno/kyverno/releases/download/v1.12.2/install.yaml
+```
