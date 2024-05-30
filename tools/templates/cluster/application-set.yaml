@@ -19,8 +19,8 @@ spec:
     metadata:
       name: '{{ if gt (len .path.segments) 3 }}{{index .path.segments 3}}-to{{ else }}clusters-wide-resources-for{{ end }}-{{index .path.segments 1}}'
       labels:
-      wsp.io/application: '{{ .path.basename }}'
-      wsp.io/destination: '{{ index .path.segments 1 }}'
+        wsp.io/application: '{{ .path.basename }}'
+        wsp.io/destination: '{{ index .path.segments 1 }}'
     spec:
       project: default
       source:
