@@ -76,9 +76,9 @@ clusters/                            # The root directory for all cluster config
     │   └── kustomization.yaml       # The kustomization for default resources (intended to be used as a base for namespaces)
     │
     └── namespaces/                  # The list of namespaces within the cluster to be configured
-        └── {namespace-name}/        # The specific application namespace (leika, lumin, report-portal)
-            ├── {resource-name}.yaml # Any namespace-scoped resource (optional, if needed)
-            └── kustomization.yaml   # The kustomization for namespace resources (can import defaults, patch them and/or add new resources)
+        ├── {namespace-name}/        # The specific application namespace (leika, lumin, report-portal)
+        │   ├── {resource-name}.yaml # Any namespace-scoped resource (optional, if needed)
+        │   └── kustomization.yaml   # The kustomization for namespace resources (can import defaults, patch them and/or add new resources)
         └── wsp-system/              # The system namespace with internal WSP configuration (required resources)
 ```
 
@@ -126,7 +126,7 @@ kubectl kustomize clusters/{CLUSTER_NAME}/namespaces/{NAMESPACE_NAME}
 ```
 
 Once you have reviewed the result and are satisfied with it, you should create a branch, commit the changes and open a
-pull request. When ths pull request is approved and merged, ArgoCD will notice the changes and apply them. The
+pull request. When this pull request is approved and merged, ArgoCD will notice the changes and apply them. The
 ApplicationSet controller will create a new Application for the new directory, which in turn will create the namespace
 itself and other resources in the cluster.
 
@@ -139,17 +139,17 @@ not partial and will pass the API validation).
 
 By committing to this repository, you can add, change, or remove both namespace-scoped and cluster-wide resources within
 an existing cluster. Kustomize offers very flexible options for modifying resources. You can learn more in the official
-[guide](https://kubectl.docs.kubernetes.io/references/kustomize/) or check out our own [recipes](/dev/kustomize-tips.md).
+[guide](https://kubectl.docs.kubernetes.io/references/kustomize/) or check out our own [recipes](dev/kustomize-tips.md).
 
 To make it easier to get started, we have prepared guides for the most common tasks:
 
-- [Grant access to an application namespace to a user or group using OIDC](/docs/grant-access-by-oidc.md)
-- [Change resource limits for an application namespace](/docs/change-ns-resources-limits.md)
-- [Allow custom network connections within the cluster](/docs/allow-for-external-connections.md)
-- [Allow to deploy an application with resources that require approval](/docs/modify-cd-permissions)
-- [Allow to assume an AWS role in an application namespace](/docs/using-kube2iam.md)
-- [Grant access to the Kubernetes API for an application](/docs/grant-access-to-k8s-api.md)
-- [Allow an application to expose TCP or UDP ports to the Internet](/docs/expose-service.md)
+- [Grant access to an application namespace to a user or group using OIDC](docs/grant-access-by-oidc.md)
+- [Change resource limits for an application namespace](docs/change-ns-resources-limits.md)
+- [Allow custom network connections within the cluster](docs/allow-for-external-connections.md)
+- [Allow to deploy an application with resources that require approval](docs/modify-cd-permissions)
+- [Allow to assume an AWS role in an application namespace](docs/using-kube2iam.md)
+- [Grant access to the Kubernetes API for an application](docs/grant-access-to-k8s-api.md)
+- [Allow an application to expose TCP or UDP ports to the Internet](docs/expose-service.md)
 
 ## Delete a namespace
 
