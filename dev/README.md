@@ -80,3 +80,7 @@ kubectl -n argocd apply -f clusters/{CLUSTER_NAME}/application-set.yaml
 
 After successful applying the ApplicationSet, the ArgoCD server will create the Applications for the cluster.
 You can see the list of the Applications and the status of the synchronization in the ArgoCD UI.
+
+# Maintenance
+
+Maintenance cases ware described in the [page](maintenance.md).

@@ -4,7 +4,7 @@ kind: Kustomization
 namespace: wsp-system
 
 resources:
-  - ../../defaults/ns.target.yaml
+  - ns.wsp-system.yaml
   - sa.wsp-cd.yaml
   - secret.wsp-cd-token.yaml
   - cm.kube2iam-access.yaml
