@@ -2,7 +2,8 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: argocd
 resources:
-  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.10.7/manifests/install.yaml
+  - https://raw.githubusercontent.com/argoproj/argo-cd/v2.11.3/manifests/install.yaml
+  - ingress.yaml
 patches:
   # Specify the admin password for the ArgoCD UI
   - target:
@@ -15,3 +16,8 @@ patches:
         value:
           "admin.password": "$2a$10$48U85bahwi7Vb4TQeFnvuOBLqhuDuHGvX22IRQYBwOZeCBoUhLV2K"   # "admin"
           "admin.passwordMtime": "2021-09-01T00:00:00Z"
+configMapGenerator:
+  - name: argocd-cmd-params-cm
+    behavior: merge
+    literals:
+      - applicationsetcontroller.enable.policy.override="true"

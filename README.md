@@ -110,7 +110,7 @@ each application may have its own namespace, or multiple applications may share 
 focusing on namespace configuration here.
 
 To create a namespace, you need to add the corresponding resource, which will be delivered by ArgoCD, in the correct
-path according to the [repository structure](#Repository-structure). Typically, in addition to the namespace itself,
+path according to the [repository structure](#repository-structure). Typically, in addition to the namespace itself,
 you also want to add some default resources to it. To reuse existing per-cluster defaults, you need to add an
 appropriate kustomization. For this most typical case you can use the following helper script:
 
