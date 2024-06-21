@@ -75,6 +75,30 @@ replacements:
           - spec.0.ingress.0.fromEndpoints.0.matchLabels.[k8s:io.kubernetes.pod.namespace]
 ```
 
+- How to add annotations to a resource in a kustomization file
+
+```yaml
+patches:
+  - target:
+      kind: Namespace
+    patch: |-
+      - op: add
+        path: /metadata/annotations/iam.amazonaws.com~1allowed-roles
+        value: '["arn:aws:iam::123456789098:role/my-role"]'
+```
+
+- How to remove a label with a specific key from a resource in a kustomization file
+
+```yaml
+patches:
+  - target:
+      kind: Deployment
+      name: deployment-name
+    patch: |-
+      - op: remove
+        path: /metadata/labels/beta.kubernetes.io~1os  # beta.kubernetes.io/os
+```
+
 - How to remove resource from a base in a kustomization file
 
 ```yaml

@@ -8,7 +8,12 @@ can create a Role and RoleBinding for the service account in the namespace.
 # Use case
 
 The application `partner-backend` (with the service account `default`) requires the ability to create Kubernetes Jobs,
-Pods, and ConfigMaps in the namespace `partner-cp`.
+Pods, and ConfigMaps in the namespace `partner-cp`. Deploying the application fails with the following error:
+
+```bash
+Error from server (Forbidden): error when creating "job.yaml": jobs.batch is forbidden: 
+User "system:serviceaccount:partner-cp:default" cannot create resource "jobs" in API group "batch" in the namespace "partner-cp"
+```
 
 # Decision
 
@@ -90,16 +95,19 @@ resources:
 ## Check result
 
 ```bash
-kusomize build .
+kustomize build clusters/<cluster-name>/namespaces/<target-namespace>/
 or
-kubectl apply -k . --dry-run=client
+kubectl kustomize clusters/<cluster-name>/namespaces/<target-namespace>/
 ```
 
 And you can check the permissions for the service account in the namespace:
 
 ```bash
-kubectl -n <target-namespace> auth can-i get pods --as=system:serviceaccount:<target-namespace>:default     # yes
-kubectl -n <target-namespace> auth can-i get secrets --as=system:serviceaccount:<target-namespace>:default  # no
+kubectl -n <target-namespace> auth can-i get pods --as=system:serviceaccount:<target-namespace>:default
+# yes
+
+kubectl -n <target-namespace> auth can-i get secrets --as=system:serviceaccount:<target-namespace>:default
+# no
 ```
 
 ## Additional resources

@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: wsp-${CLUSTER_NAME}-configuration
+  name: ${CLUSTER_NAME}-configuration
   namespace: argocd
 spec:
   goTemplate: true
@@ -9,12 +9,19 @@ spec:
   syncPolicy:
     applicationsSync: create-delete
   generators:
-    - git:
-        repoURL: https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git
-        revision: master
-        directories:
-          - path: clusters/${CLUSTER_NAME}/cluster-wide
-          - path: clusters/${CLUSTER_NAME}/namespaces/*
+    - matrix:
+        generators:
+          - clusters:
+              selector:
+                matchLabels:
+                  cluster_name: ${CLUSTER_NAME}
+
+          - git:
+              repoURL: "{{ .metadata.annotations.wspcc_repo_url }}"
+              revision: "{{ .metadata.annotations.wspcc_repo_revision }}"
+              directories:
+                - path: "clusters/{{ .name }}/cluster-wide"
+                - path: "clusters/{{ .name }}/namespaces/*"
   template:
     metadata:
       name: '{{ if gt (len .path.segments) 3 }}{{index .path.segments 3}}-to{{ else }}clusters-wide-resources-for{{ end }}-{{index .path.segments 1}}'
@@ -24,8 +31,8 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git
-        targetRevision: master
+        repoURL: "{{ .metadata.annotations.wspcc_repo_url }}"
+        targetRevision: "{{ .metadata.annotations.wspcc_repo_revision }}"
         path: '{{ .path.path }}'
       destination:
         name: '{{ index .path.segments 1 }}'

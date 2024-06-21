@@ -3,7 +3,6 @@ kind: Kustomization
 
 commonLabels:
   wsp.io/part-of: wsp-cluster-configuration
-  wsp.io/cluster-name: ${CLUSTER_NAME}
 
 resources:
   - ns.target.yaml
