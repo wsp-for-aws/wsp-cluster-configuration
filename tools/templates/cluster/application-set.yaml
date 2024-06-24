@@ -12,13 +12,22 @@ spec:
     - matrix:
         generators:
           - clusters:
-              selector:
-                matchLabels:
-                  cluster_name: ${CLUSTER_NAME}
+              values:
+                # WA:
+                # `.metadata.annotations` has map[string]string type, but go functions expect map[string]interface{}.
+                # `toYaml .metadata.annotations | fromYaml` allows us to make such a conversion.
+                repo_url: '{{ toYaml .metadata.annotations | fromYaml | dig "wsp-cluster-configuration/repo-url" "https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git" }}'
+                revision: '{{ toYaml .metadata.annotations | fromYaml | dig "wsp-cluster-configuration/revision" "master" }}'
+            selector:
+              matchExpressions:
+                - key: name
+                  operator: In
+                  values:
+                    - ${CLUSTER_NAME}
 
           - git:
-              repoURL: "{{ .metadata.annotations.wspcc_repo_url }}"
-              revision: "{{ .metadata.annotations.wspcc_repo_revision }}"
+              repoURL: "{{ .values.repo_url }}"
+              revision: "{{ .values.revision }}"
               directories:
                 - path: "clusters/{{ .name }}/cluster-wide"
                 - path: "clusters/{{ .name }}/namespaces/*"
@@ -31,8 +40,8 @@ spec:
     spec:
       project: default
       source:
-        repoURL: "{{ .metadata.annotations.wspcc_repo_url }}"
-        targetRevision: "{{ .metadata.annotations.wspcc_repo_revision }}"
+        repoURL: "{{ .values.repo_url }}"
+        targetRevision: "{{ .values.revision }}"
         path: '{{ .path.path }}'
       destination:
         name: '{{ index .path.segments 1 }}'
