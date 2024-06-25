@@ -7,7 +7,6 @@ resources:
   - no-loadbalancer-service.yaml
   - prevent-namespace-deletion.yaml
   - restrict-ingress-wildcard.yaml
-  - restrict-kube2iam-annotations.yaml
   - unique-external-dns.yaml
   - unique-ingress-host.yaml
   - validate-probes.yaml

@@ -20,7 +20,7 @@ User "system:serviceaccount:partner-cp:default" cannot create resource "jobs" in
 To change the default permissions (the `default` service account cannot interact with the Kubernetes API),
 we need to create a new Role with a custom set of permissions and bind it to the service account `default`.
 Also, need to create a Cilium network policy to allow the application to interact Kubernetes API.
-Prepare the following files in the `clusters/<cluster-name>/namespaces/<target-namespace>` directory.
+Prepare the following files in the `clusters/<cluster-name>/namespaces/application/<target-namespace>` directory.
 
 - `role.partner-cp.yaml`
 
@@ -86,7 +86,7 @@ kind: Kustomization
 namespace: partner-cp
 
 resources:
-  - ../../default/
+  - ../../../defaults/
   - cnp.partner-cp.yaml
   - role.partner-cp.yaml
   - rolebinding.partner-cp.yaml
@@ -95,9 +95,9 @@ resources:
 ## Check result
 
 ```bash
-kustomize build clusters/<cluster-name>/namespaces/<target-namespace>/
+kustomize build clusters/<cluster-name>/namespaces/application/<target-namespace>/
 or
-kubectl kustomize clusters/<cluster-name>/namespaces/<target-namespace>/
+kubectl kustomize clusters/<cluster-name>/namespaces/application/<target-namespace>/
 ```
 
 And you can check the permissions for the service account in the namespace:

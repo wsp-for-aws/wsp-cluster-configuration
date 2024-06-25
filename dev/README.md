@@ -97,7 +97,7 @@ First of all, we need to create required cluster resources according to the desc
 [structure](../README.md#repository-structure):
 
 ```bash
-tools/add_cluster.sh ${CLUSTER_NAME}
+tools/genereate_skeleton.sh clusters/<cluster-name>
 ```
 
 The script will create for you all the necessary directories and files. Feel free to modify the generated skeleton if
@@ -225,7 +225,7 @@ you understand the overall effect.
 As an alternative to modifying an existing cluster, at some point you may want to rework the skeleton for new clusters.
 To do that you need to adapt resources within `tools/templates/cluster` directory and run the generator script:
 ```bash
-tools/add_cluster.sh test-cluster
+tools/generate_skeleton.sh clusters/test-cluster
 ```
 
 Then you should create a branch, commit and push the configuration for the test cluster. After proper

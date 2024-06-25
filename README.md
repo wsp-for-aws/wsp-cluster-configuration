@@ -62,24 +62,26 @@ policies can be safely used to allow specific traffic both inside and outside an
 The configuration within the repository is structured as follows:
 
 ```
-clusters/                            # The root directory for all cluster configurations
-└── {cluster-name}/                  # The specific cluster to be configured (dev, staging, internal, production)
-    ├── application-set.yaml         # The ArgoCD ApplicationSet that automatically creates and deletes ArgoCD Applications for the cluster
+clusters/                                # The root directory for all cluster configurations
+└── {cluster-name}/                      # The specific cluster to be configured (dev, staging, internal, production)
+    ├── application-set.yaml             # The ArgoCD ApplicationSet that automatically creates and deletes ArgoCD Applications for the cluster
     │
-    ├── cluster-wide/                # The directory for cluster-wide resources
-    │   ├── kyverno-policies/        # Global WSP policies
-    │   ├── {resource-name}.yaml     # ClusterRole, ClusterRoleBinding, CiliumClusterwideNetworkPolicy, etc.
-    │   └── kustomization.yaml       # The kustomization for cluster-wide resources
+    ├── cluster-wide/                    # The directory for cluster-wide resources
+    │   ├── kyverno-policies/            # Global WSP policies
+    │   ├── {resource-name}.yaml         # ClusterRole, ClusterRoleBinding, CiliumClusterwideNetworkPolicy, etc.
+    │   └── kustomization.yaml           # The kustomization for cluster-wide resources
     │
-    ├── defaults/                    # The directory for resources common for all application namespaces
-    │   ├── {resource-name}.yaml     # Namespace, RoleBinding, ResourceQuote, CiliumNetworkPolicy, etc.
-    │   └── kustomization.yaml       # The kustomization for default resources (intended to be used as a base for namespaces)
+    ├── defaults/                        # The directory for resources common for all application namespaces
+    │   ├── {resource-name}.yaml         # Namespace, RoleBinding, ResourceQuote, CiliumNetworkPolicy, etc.
+    │   └── kustomization.yaml           # The kustomization for default resources (intended to be used as a base for namespaces)
     │
-    └── namespaces/                  # The list of namespaces within the cluster to be configured
-        ├── {namespace-name}/        # The specific application namespace (leika, lumin, report-portal)
-        │   ├── {resource-name}.yaml # Any namespace-scoped resource (optional, if needed)
-        │   └── kustomization.yaml   # The kustomization for namespace resources (can import defaults, patch them and/or add new resources)
-        └── wsp-system/              # The system namespace with internal WSP configuration (required resources)
+    └── namespaces/                      # The directory for namespace configurations
+        ├── application/                 # The directory for application namespaces
+        │   └── {namespace-name}/        # The specific application namespace (leika, lumin, report-portal)
+        │       ├── {resource-name}.yaml # Any namespace-scoped resource (optional, if needed)
+        │       └── kustomization.yaml   # The kustomization for namespace resources (can import defaults, patch them and/or add new resources)
+        └── system/                      # The directory for system namespaces (kube-system, wsp-system, etc.)
+            └── wsp-system/              # The system namespace with internal WSP configuration (required resources)
 ```
 
 This structure allows you to manage cluster-wide resources, default resources, and application resources separately on
@@ -115,14 +117,14 @@ you also want to add some default resources to it. To reuse existing per-cluster
 appropriate kustomization. For this most typical case you can use the following helper script:
 
 ```bash
-tools/add_namespace.sh {CLUSTER_NAME} {NAMESPACE_NAME}
+tools/generate_skeleton.sh clusters/{cluster-name}/namespaces/application/{namespace-name}
 ```
 
-The script will generate a skeleton for you in the `clusters/{CLUSTER_NAME}/namespaces/{NAMESPACE_NAME}` directory,
-overwriting all existing files (if any). To see the generated resources run the following command:
+The script will generate a skeleton for you in the specified directory. 
+To see the generated resources run the following command:
 
 ```bash
-kubectl kustomize clusters/{CLUSTER_NAME}/namespaces/{NAMESPACE_NAME}
+kubectl kustomize clusters/{cluster-name}/namespaces/application/{namespace-name}
 ```
 
 Once you have reviewed the result and are satisfied with it, you should create a branch, commit the changes and open a

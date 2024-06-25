@@ -44,7 +44,7 @@ We can use the following ClusterRoles for the namespace:
 
 To use these roles, you should create a RoleBinding with the required subjects.
 
-Prepare the following files in the `clusters/<cluster-name>/namespaces/<target-namespace>` directory.
+Prepare the following files in the `clusters/<cluster-name>/namespaces/application/<target-namespace>` directory.
 
 - `rolebinding.viewers.yaml`:
 
@@ -90,7 +90,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: <target-namespace>
 resources:
-  - ../../default/
+  - ../../../defaults/
   - rolebinding.admins.yaml
   - rolebinding.viewers.yaml
 ```
@@ -100,9 +100,9 @@ If you need to add a custom role into the namespace, you can use the guide [Modi
 ## Check result
 
 ```bash
-kustomize build clusters/<cluster-name>/namespaces/<target-namespace>/
+kustomize build clusters/<cluster-name>/namespaces/application/<target-namespace>/
 or
-kubectl kustomize clusters/<cluster-name>/namespaces/<target-namespace>/
+kubectl kustomize clusters/<cluster-name>/namespaces/application/<target-namespace>/
 ```
 
 The correct configuration should be committed to the repository and applied to the target cluster.

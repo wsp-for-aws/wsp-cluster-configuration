@@ -1,11 +1,11 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: ${CLUSTER_NAME}-configuration
+  name: __CLUSTER_NAME__-configuration
   namespace: argocd
 spec:
   goTemplate: true
-  goTemplateOptions: [ "missingkey=error" ] # ref: https://pkg.go.dev/text/template#Template.Option
+  goTemplateOptions: [ missingkey=error ] # ref: https://pkg.go.dev/text/template#Template.Option
   syncPolicy:
     applicationsSync: create-delete
   generators:
@@ -17,35 +17,37 @@ spec:
                 # `.metadata.annotations` has map[string]string type, but go functions expect map[string]interface{}.
                 # `toYaml .metadata.annotations | fromYaml` allows us to make such a conversion.
                 repo_url: '{{ toYaml .metadata.annotations | fromYaml | dig "wsp-cluster-configuration/repo-url" "https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git" }}'
-                revision: '{{ toYaml .metadata.annotations | fromYaml | dig "wsp-cluster-configuration/revision" "master" }}'
+                branch: '{{ toYaml .metadata.annotations | fromYaml | dig "wsp-cluster-configuration/branch" "master" }}'
             selector:
               matchExpressions:
                 - key: name
                   operator: In
                   values:
-                    - ${CLUSTER_NAME}
+                    - __CLUSTER_NAME__
 
           - git:
-              repoURL: "{{ .values.repo_url }}"
-              revision: "{{ .values.revision }}"
+              repoURL: '{{ .values.repo_url }}'
+              revision: '{{ .values.branch }}'
               directories:
-                - path: "clusters/{{ .name }}/cluster-wide"
-                - path: "clusters/{{ .name }}/namespaces/*"
+                - path: 'clusters/{{ .name }}/cluster-wide'
+                - path: 'clusters/{{ .name }}/namespaces/application/*'
+                - path: 'clusters/{{ .name }}/namespaces/system/*'
   template:
     metadata:
-      name: '{{ if gt (len .path.segments) 3 }}{{index .path.segments 3}}-to{{ else }}clusters-wide-resources-for{{ end }}-{{index .path.segments 1}}'
+      name: '{{ list .path.basename "-configuration." ( index .path.segments 1 ) | join "" | slugify 63 }}'
       labels:
-        wsp.io/application: '{{ .path.basename }}'
-        wsp.io/destination: '{{ index .path.segments 1 }}'
+        wsp-cluster-configuration/type: '{{ if gt (len .path.segments) 3 }}{{ index .path.segments 3 }}{{ else }}{{ .path.basename }}{{ end }}'
+    #  annotations:
+    #    link.argocd.argoproj.io/external-link: https://grafana.monitoring/namespace/dashboard
     spec:
       project: default
       source:
-        repoURL: "{{ .values.repo_url }}"
-        targetRevision: "{{ .values.revision }}"
+        repoURL: '{{ .values.repo_url }}'
+        targetRevision: '{{ .values.branch }}'
         path: '{{ .path.path }}'
       destination:
         name: '{{ index .path.segments 1 }}'
-        namespace: '{{ if gt (len .path.segments) 3 }}{{index .path.segments 3}}{{ else }}{{ end }}'
+        namespace: '{{ if eq (len .path.segments) 3 }}{{ else }}{{ index .path.segments 4 }}{{ end }}'
       syncPolicy:
         automated:
           prune: true
@@ -54,3 +56,16 @@ spec:
           - ApplyOutOfSyncOnly=true
           - CreateNamespace=false
           - FailOnSharedResource=true
+  templatePatch: |
+    spec:
+      info:
+        - name: Description
+        {{- if eq (len .path.segments) 3 }}
+          value: 'Provides the cluster-wide configuration.'
+        {{- else if eq (index .path.segments 3) "system" }}
+          value: 'Provides the configuration for "{{ index .path.segments 4 }}" namespace.'
+        {{- else }}
+          value: 'Provides administrative resources for "{{ index .path.segments 4 }}" application namespace.'
+        {{- end }}
+        - name: Source
+          value: 'https://git.plesk.tech/projects/WSP/repos/wsp-cluster-configuration/browse/{{ .values.repo_url }}?at=refs%2Fheads%2F{{ .values.branch }}'

@@ -126,7 +126,7 @@ The `partner-api` application (from the namespace `partner-cp`) needs to interac
 To decide the task, you need to add an external Cilium network policy. The policy should allow the application
 `partner-api` to communicate with the service `auth` on the port `5555` and receive requests from the service
 `billing-backend` on the port `5080`.
-Prepare the following files in the `clusters/<cluster-name>/namespaces/<target-namespace>` directory.
+Prepare the following files in the `clusters/<cluster-name>/namespaces/application/<target-namespace>` directory.
 
 - `cnp.partner-api.yaml`:
 
@@ -169,16 +169,16 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: partner-cp
 resources:
-  - ../../default/
+  - ../../../defaults/
   - cnp.partner-api.yaml
 ```
 
 ### Check result
 
 ```bash
-kustomize build clusters/<cluster-name>/namespaces/<target-namespace>/
+kustomize build clusters/<cluster-name>/namespaces/application/<target-namespace>/
 or
-kubectl kustomize clusters/<cluster-name>/namespaces/<target-namespace>/
+kubectl kustomize clusters/<cluster-name>/namespaces/application/<target-namespace>/
 ```
 
 After applying the policy, the application `partner-api` can communicate with the service `auth` on the port `5555`

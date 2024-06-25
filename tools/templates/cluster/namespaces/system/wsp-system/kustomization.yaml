@@ -7,4 +7,3 @@ resources:
   - ns.wsp-system.yaml
   - sa.wsp-cd.yaml
   - secret.wsp-cd-token.yaml
-  - cm.kube2iam-access.yaml
