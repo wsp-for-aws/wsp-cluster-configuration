@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube2iam-access
+data:
+  # The following is a list of application namespaces that are allowed to assume the role via kube2iam and the annotations.
+  # The format is as follows:
+  # <namespace>: [<role-arn>, <role-arn>, ...] OR ['*']
+  #
+  # For example:
+  #  allowFor: |
+  #    "wsp-system":
+  #      - "arn:aws:iam::123456789012:role/name"
+
+  allowFor: '{}'
