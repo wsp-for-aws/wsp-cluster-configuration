@@ -4,4 +4,4 @@ kind: Kustomization
 namespace: ${NAMESPACE_NAME}
 
 resources:
-  - ../../defaults/
+  - ../../../defaults/

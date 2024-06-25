@@ -53,7 +53,7 @@ RoleBinding resources in the namespace `partner-cp`.
 We use the one service account `wsp-cd` from the namespace `wsp-system` to deploy client applications.
 By default, the service account has no permissions to manage the ServiceAccount, Role, and RoleBinding resources.
 You need to create a new Role with a custom set of permissions and bind it to the service account `wsp-cd`.
-Prepare the following files in the `clusters/<cluster-name>/namespaces/<target-namespace>` directory.
+Prepare the following files in the `clusters/<cluster-name>/namespaces/application/<target-namespace>` directory.
 
 - `role.deployer.yaml`
 
@@ -97,7 +97,7 @@ kind: Kustomization
 namespace: partner-cp
 
 resources:
-  - ../../default/
+  - ../../../defaults/
   - role.deployer.yaml
   - rolebinding.deployer.yaml
 ```
@@ -105,9 +105,9 @@ resources:
 ## Check result
 
 ```bash
-kustomize build clusters/<cluster-name>/namespaces/<target-namespace>/
-or
-kubectl kustomize clusters/<cluster-name>/namespaces/<target-namespace>/
+kustomize build clusters/<cluster-name>/namespaces/application/<target-namespace>/
+# or
+kubectl kustomize clusters/<cluster-name>/namespaces/application/<target-namespace>/
 ```
 
 And you can check the permissions for the service account in the namespace:

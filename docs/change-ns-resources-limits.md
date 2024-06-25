@@ -68,7 +68,7 @@ We need to increase the limits to the following values:
 # Decision
 
 To change the `ResourceQuota` resource, we need to prepare a patch.
-Prepare the following files in the `clusters/<cluster-name>/namespaces/<target-namespace>` directory.
+Prepare the following files in the `clusters/<cluster-name>/namespaces/application/<target-namespace>` directory.
 
 - `qouta.wsp.yaml`:
 
@@ -79,7 +79,7 @@ metadata:
   name: ns-limits
 spec:
   hard:
-    # Default values: clusters/<cluster-name>/namespaces/<target-namespace>/default/quota.ns-limits.yaml
+    # Default values: clusters/<cluster-name>/default/quota.ns-limits.yaml
     # changing of the default value from X to the following values:
     requests.cpu: "2"
     limits.cpu: "4"
@@ -93,7 +93,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: report-portal
 resources:
-  - ../../default/
+  - ../../../defaults/
 
 patches:
   - path: quota.ns-limits.yaml
@@ -115,7 +115,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 namespace: report-portal
 resources:
-  - ../../default/
+  - ../../../defaults/
 
 patches:
   - target:
@@ -137,7 +137,7 @@ patches:
 ## Check result
 
 ```bash
-kustomize build clusters/<cluster-name>/namespaces/<target-namespace>/
+kustomize build clusters/<cluster-name>/namespaces/application/<target-namespace>/
 or
-kubectl kustomize clusters/<cluster-name>/namespaces/<target-namespace>/
+kubectl kustomize clusters/<cluster-name>/namespaces/application/<target-namespace>/
 ```

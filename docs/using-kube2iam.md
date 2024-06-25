@@ -67,7 +67,7 @@ To allow the use of the kube2iam annotations, we need to add
 the annotation `iam.amazonaws.com/allowed-roles: '["arn:aws:iam::123456789098:role/report-portal"]'` to
 the namespace `report-portal`.
 
-Prepare the following files in the `clusters/<cluster-name>/namespaces/<target-namespace>` directory.
+Prepare the following files in the `clusters/<cluster-name>/namespaces/application/<target-namespace>` directory.
 
 - `kustomization.yaml`:
 
@@ -140,9 +140,9 @@ Do not forget to add the `cnp.report-portal.yaml` file to the `kustomization.yam
 ## Check result
 
 ```bash
-kustomize build clusters/<cluster-name>/namespaces/<target-namespace>/
+kustomize build clusters/<cluster-name>/namespaces/application/<target-namespace>/
 or
-kubectl kustomize clusters/<cluster-name>/namespaces/<target-namespace>/
+kubectl kustomize clusters/<cluster-name>/namespaces/application/<target-namespace>/
 ```
 
 After applied this changes in a target cluster, a client pod (that stored in outside this repo) can use the kube2iam
