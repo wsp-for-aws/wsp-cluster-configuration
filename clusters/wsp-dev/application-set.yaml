@@ -9,41 +9,46 @@ spec:
   syncPolicy:
     applicationsSync: create-delete
   generators:
-    - merge:
-        mergeKeys:
-          # Note that this would not work with goTemplate enabled,
-          # nested merge keys are not supported there.
-          - values.selector
+#    - merge:
+#        mergeKeys:
+#          # Note that this would not work with goTemplate enabled,
+#          # nested merge keys are not supported there.
+#          - path
+#        generators:
+    - matrix:
         generators:
-          - matrix:
-              generators:
-                - clusters:
-                    values:
-                      # WA:
-                      # `.metadata.annotations` has map[string]string type, but go functions expect map[string]interface{}.
-                      # `toYaml .metadata.annotations | fromYaml` allows us to make such a conversion.
-                      repo_url: '{{ toYaml .metadata.annotations | fromYaml | dig "wsp-cluster-configuration/repo-url" "https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git" }}'
-                      branch: '{{ toYaml .metadata.annotations | fromYaml | dig "wsp-cluster-configuration/branch" "master" }}'
-                  selector:
-                    matchExpressions:
-                      - key: name
-                        operator: In
-                        values:
-                          - wsp-dev
-
-                - git:
-                    repoURL: '{{ .values.repo_url }}'
-                    revision: '{{ .values.branch }}'
-                    directories:
-                      - path: 'clusters/{{ .name }}/cluster-wide'
-                      - path: 'clusters/{{ .name }}/namespaces/application/*'
-                      - path: 'clusters/{{ .name }}/namespaces/system/*'
+          - clusters:
+              values:
+                # WA:
+                # `.metadata.annotations` has map[string]string type, but go functions expect map[string]interface{}.
+                # `toYaml .metadata.annotations | fromYaml` allows us to make such a conversion.
+                repo_url: '{{ toYaml .metadata.annotations | fromYaml | dig "wsp-cluster-configuration/repo-url" "https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git" }}'
+                branch: '{{ toYaml .metadata.annotations | fromYaml | dig "wsp-cluster-configuration/branch" "master" }}'
+            selector:
+              matchExpressions:
+                - key: name
+                  operator: In
+                  values:
+                    - wsp-dev
 
           - git:
               repoURL: '{{ .values.repo_url }}'
               revision: '{{ .values.branch }}'
+#              directories:
+#                - path: 'clusters/{{ .name }}/cluster-wide'
+#                - path: 'clusters/{{ .name }}/namespaces/application/*'
+#                - path: 'clusters/{{ .name }}/namespaces/system/*'
               files:
-                - path: '{{ .path.path }}/.metadata'
+                - path: 'clusters/{{ .name }}/namespaces/application/*/.metadata'
+                - path: 'clusters/{{ .name }}/namespaces/system/*/'
+#
+#          - git:
+#              repoURL: 'https://git.plesk.tech/scm/wsp/wsp-cluster-configuration.git'
+#              revision: 'argocd'
+#              files:
+#                - path: 'clusters/wsp-dev/namespaces/application/leika/.metadata'
+#              values:
+#                merge_key: 'clusters/wsp-dev/namespaces/application/leika'
 
   template:
     metadata:
