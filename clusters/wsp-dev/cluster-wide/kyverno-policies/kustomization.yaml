@@ -1,0 +1,12 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  ## Source of the several policies: https://kyverno.io/policies/
+  - add-default-requests.yaml
+  - no-loadbalancer-service.yaml
+  - prevent-namespace-deletion.yaml
+  - restrict-ingress-wildcard.yaml
+  - unique-external-dns.yaml
+  - unique-ingress-host.yaml
+  - validate-probes.yaml

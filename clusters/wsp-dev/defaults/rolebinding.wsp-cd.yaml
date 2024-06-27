@@ -1,0 +1,12 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: wsp-cd
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: wsp-cd
+subjects:
+  - kind: ServiceAccount
+    name: wsp-cd
+    namespace: wsp-system
